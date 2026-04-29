@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odontograma — FactusRH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --surface: #ffffff;
+    --surface-2: #f4f3ee;
+    --ink: #1a1a1a;
+    --ink-2: #4a4a4a;
+    --ink-3: #8a8a86;
+    --line: #e5e3dc;
+    --line-2: #d4d2ca;
+    --accent: #1f4e4a;
+    --accent-2: #2d6b66;
+
+    /* Condition colors - semantic, distinguishable, print-safe */
+    --c-sano: #ffffff;
+    --c-caries: #d64545;
+    --c-obturado: #2563eb;
+    --c-corona: #f59e0b;
+    --c-endodoncia: #8b5cf6;
+    --c-extraccion: #ef4444;
+    --c-ausente: #525252;
+    --c-implante: #0891b2;
+    --c-fractura: #dc2626;
+    --c-sellante: #84cc16;
+    --c-protesis: #a855f7;
+    --c-supernumerario: #ec4899;
+    --c-agenesia: #6b7280;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(31, 78, 74, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(214, 69, 69, 0.03) 0%, transparent 40%);
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .brand span {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .brand-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  .header-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== PATIENT BAR ===== */
+  .patient-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 200px 200px;
+    gap: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .field label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+  }
+  .field input, .field select {
+    border: none;
+    border-bottom: 1px solid var(--line-2);
+    background: transparent;
+    padding: 4px 0;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+  }
+  .field input::placeholder { color: var(--ink-3); }
+
+  /* ===== TABS ===== */
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  .tab {
+    padding: 12px 20px;
+    border: none;
+    background: transparent;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .tab:hover { color: var(--ink-2); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ===== ODONTOGRAM ===== */
+  .odo-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .toggle-group {
+    display: inline-flex;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+  }
+  .toggle-btn {
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+  .toggle-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+  .toggle-btn:not(:last-child) { border-right: 1px solid var(--line-2); }
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink-2);
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border: 1px solid var(--line-2);
+  }
+
+  .arch-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-3);
+    text-align: center;
+    margin: 12px 0 4px;
+  }
+
+  .quadrant-labels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 8px;
+  }
+  .quadrant-labels span:last-child { text-align: right; }
+
+  .arch {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+  .arch.upper { border-bottom: none; }
+  .arch-divider {
+    height: 1px;
+    background: var(--line-2);
+    margin: 0;
+  }
+  .arch-half {
+    display: flex;
+    gap: 4px;
+    padding: 0 8px;
+  }
+  .arch-half.left { border-right: 1px dashed var(--line-2); padding-right: 16px; }
+  .arch-half.right { padding-left: 16px; }
+
+  /* ===== TOOTH ===== */
+  .tooth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+  .tooth-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .tooth.has-data .tooth-num { color: var(--accent); font-weight: 700; }
+
+  .tooth-svg {
+    width: 38px;
+    height: 48px;
+    display: block;
+  }
+  .tooth-svg.deciduous {
+    width: 32px;
+    height: 40px;
+  }
+  .face {
+    stroke: var(--ink);
+    stroke-width: 1;
+    fill: var(--c-sano);
+    transition: fill 0.1s;
+    cursor: pointer;
+  }
+  .face:hover { stroke-width: 2; }
+  .tooth-outline {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    pointer-events: none;
+  }
+  .tooth.absent .face { fill: var(--c-ausente); opacity: 0.4; }
+  .tooth.absent .tooth-svg { opacity: 0.5; }
+
+  /* Whole-tooth overlay markers */
+  .whole-marker {
+    pointer-events: none;
+    stroke: var(--ink);
+    stroke-width: 1.5;
+    fill: none;
+  }
+
+  /* ===== CLEFT PANEL ===== */
+  .cleft-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 32px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 28px;
+  }
+
+  .cleft-svg-wrap {
+    background: var(--surface-2);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cleft-region {
+    fill: #f9d4c9;
+    stroke: var(--ink);
+    stroke-width: 1.2;
+    cursor: pointer;
+    transition: fill 0.15s;
+  }
+  .cleft-region:hover { fill: #ffb3a0; }
+  .cleft-region.affected { fill: var(--c-caries); }
+  .cleft-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    fill: var(--ink-2);
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cleft-form { display: flex; flex-direction: column; gap: 18px; }
+  .cleft-section {
+    border-left: 2px solid var(--accent);
+    padding-left: 14px;
+  }
+  .cleft-section h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .radio-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .radio-row label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .check-row { display: flex; flex-direction: column; gap: 6px; }
+  .check-row label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  /* ===== FINDINGS PANEL ===== */
+  .findings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .finding-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 16px;
+  }
+  .finding-card h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--accent);
+  }
+  .finding-card textarea {
+    width: 100%;
+    min-height: 60px;
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    resize: vertical;
+    background: var(--bg);
+  }
+  .finding-card textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 20, 20, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    width: 520px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--line-2);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.25);
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-head h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .modal-head .tooth-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--ink-3);
+    line-height: 1;
+  }
+  .modal-body { padding: 20px 24px; }
+  .modal-foot {
+    padding: 14px 24px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .face-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .face-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+  .face-row label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    letter-spacing: 0.05em;
+  }
+  .face-row select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--line-2);
+    background: var(--bg);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+  }
+
+  .whole-tooth-section {
+    background: var(--surface-2);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+  }
+  .whole-tooth-section h5 {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+  }
+  .whole-tooth-section select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    font-size: 13px;
+  }
+
+  .modal textarea {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    resize: vertical;
+    background: var(--bg);
+  }
+  .modal textarea:focus { outline: none; border-color: var(--accent); }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 8px 16px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+  }
+  .btn-secondary:hover { background: var(--ink); color: var(--bg); }
+  .btn-danger {
+    background: transparent;
+    color: var(--c-extraccion);
+    border-color: var(--c-extraccion);
+  }
+  .btn-danger:hover { background: var(--c-extraccion); color: white; }
+
+  /* ===== EXPORT BAR ===== */
+  .export-bar {
+    margin-top: 32px;
+    padding: 20px 24px;
+    background: var(--ink);
+    color: var(--bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .export-bar h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 16px;
+  }
+  .export-bar .actions { display: flex; gap: 10px; }
+  .export-bar .btn {
+    background: transparent;
+    color: var(--bg);
+    border-color: var(--bg);
+  }
+  .export-bar .btn:hover {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .export-bar .btn.primary {
+    background: var(--bg);
+    color: var(--ink);
+  }
+  .export-bar .btn.primary:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+
+  /* ===== JSON VIEWER ===== */
+  .json-viewer {
+    margin-top: 16px;
+    background: #1a1a1a;
+    color: #e8e8e8;
+    padding: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    max-height: 400px;
+    overflow: auto;
+    display: none;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .json-viewer.open { display: block; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--accent);
+    color: white;
+    padding: 12px 18px;
+    font-size: 13px;
+    z-index: 200;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.25s;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  .risk-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  /* responsive nudges */
+  @media (max-width: 900px) {
+    .cleft-grid { grid-template-columns: 1fr; }
+    .findings { grid-template-columns: 1fr; }
+    .patient-bar { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div>
+      <div class="brand">Odontograma <span>clínico</span></div>
+      <div class="brand-sub">FactusRH · Bitrix Integration · v0.1</div>
+    </div>
+    <div class="header-meta">
+      Notación FDI · ISO 3950<br>
+      <span id="dateLabel"></span>
+    </div>
+  </header>
+
+  <!-- Patient bar -->
+  <div class="patient-bar">
+    <div class="field">
+      <label>ID Paciente (Company ID Bitrix)</label>
+      <input type="text" id="patientId" placeholder="Ej: 12345" />
+    </div>
+    <div class="field">
+      <label>Nombre referencia (opcional)</label>
+      <input type="text" id="patientName" placeholder="Solo display local" />
+    </div>
+    <div class="field">
+      <label>Fecha examen</label>
+      <input type="date" id="examDate" />
+    </div>
+    <div class="field">
+      <label>Profesional</label>
+      <input type="text" id="practitioner" placeholder="Dr/a." />
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-panel="odontogram">Odontograma</button>
+    <button class="tab" data-panel="cleft">Fisura Labiopalatina</button>
+    <button class="tab" data-panel="findings">Hallazgos & Riesgo</button>
+  </div>
+
+  <!-- ODONTOGRAM PANEL -->
+  <div class="panel active" id="panel-odontogram">
+    <div class="odo-controls">
+      <div class="toggle-group" id="dentitionToggle">
+        <button class="toggle-btn active" data-mode="permanent">Permanente</button>
+        <button class="toggle-btn" data-mode="mixed">Mixta</button>
+        <button class="toggle-btn" data-mode="deciduous">Temporal</button>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="quadrant-labels">
+      <span>Cuadrante 1 · Sup. Der.</span>
+      <span>Cuadrante 2 · Sup. Izq.</span>
+    </div>
+    <div class="arch upper" id="archUpper"></div>
+    <div class="arch-divider"></div>
+    <div class="arch lower" id="archLower"></div>
+    <div class="quadrant-labels">
+      <span>Cuadrante 4 · Inf. Der.</span>
+      <span>Cuadrante 3 · Inf. Izq.</span>
+    </div>
+
+    <div class="arch-label" style="margin-top:24px">Tip: clic en una cara para asignar condición · clic en el número del diente para opciones de diente completo</div>
+  </div>
+
+  <!-- CLEFT PANEL -->
+  <div class="panel" id="panel-cleft">
+    <div class="cleft-grid">
+      <div class="cleft-svg-wrap">
+        <svg viewBox="0 0 280 360" width="100%" style="max-width:300px">
+          <!-- Labio superior -->
+          <path id="cleft-lip-r" class="cleft-region" data-region="lip_right"
+                d="M 60 80 Q 100 60 140 75 L 140 115 Q 100 110 60 120 Z"/>
+          <path id="cleft-lip-l" class="cleft-region" data-region="lip_left"
+                d="M 140 75 Q 180 60 220 80 L 220 120 Q 180 110 140 115 Z"/>
+
+          <!-- Filtrum -->
+          <line x1="140" y1="75" x2="140" y2="115" stroke="#1a1a1a" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+          <!-- Alvéolo superior -->
+          <path id="cleft-alv-r" class="cleft-region" data-region="alveolus_right"
+                d="M 65 125 Q 100 130 140 128 L 140 158 Q 100 158 70 165 Z"/>
+          <path id="cleft-alv-l" class="cleft-region" data-region="alveolus_left"
+                d="M 140 128 Q 180 130 215 125 L 210 165 Q 180 158 140 158 Z"/>
+
+          <!-- Paladar duro -->
+          <path id="cleft-pal-r" class="cleft-region" data-region="hard_palate_right"
+                d="M 70 170 Q 100 180 140 178 L 140 245 Q 110 245 80 240 Z"/>
+          <path id="cleft-pal-l" class="cleft-region" data-region="hard_palate_left"
+                d="M 140 178 Q 180 180 210 170 L 200 240 Q 170 245 140 245 Z"/>
+
+          <!-- Paladar blando -->
+          <path id="cleft-soft-r" class="cleft-region" data-region="soft_palate_right"
+                d="M 80 245 Q 110 250 140 248 L 140 295 Q 115 290 90 280 Z"/>
+          <path id="cleft-soft-l" class="cleft-region" data-region="soft_palate_left"
+                d="M 140 248 Q 170 250 200 245 L 190 280 Q 165 290 140 295 Z"/>
+
+          <!-- Úvula -->
+          <ellipse id="cleft-uvula" class="cleft-region" data-region="uvula"
+                   cx="140" cy="310" rx="10" ry="18"/>
+
+          <!-- Labels -->
+          <text class="cleft-label" x="140" y="50" text-anchor="middle">Labio</text>
+          <text class="cleft-label" x="40" y="148" text-anchor="middle">Alvéolo</text>
+          <text class="cleft-label" x="40" y="208" text-anchor="middle">Paladar duro</text>
+          <text class="cleft-label" x="40" y="265" text-anchor="middle">Paladar blando</text>
+          <text class="cleft-label" x="180" y="335" text-anchor="middle">Úvula</text>
+
+          <!-- Side markers -->
+          <text class="cleft-label" x="60" y="20">DER</text>
+          <text class="cleft-label" x="220" y="20">IZQ</text>
+        </svg>
+      </div>
+
+      <div class="cleft-form">
+        <div class="cleft-section">
+          <h4>Tipo de fisura</h4>
+          <div class="radio-row">
+            <label><input type="radio" name="cleft_type" value="none" checked> Sin fisura</label>
+            <label><input type="radio" name="cleft_type" value="unilateral_right"> Unilateral derecha</label>
+            <label><input type="radio" name="cleft_type" value="unilateral_left"> Unilateral izquierda</label>
+            <label><input type="radio" name="cleft_type" value="bilateral"> Bilateral</label>
+            <label><input type="radio" name="cleft_type" value="median"> Mediana</label>
+            <label><input type="radio" name="cleft_type" value="submucosa"> Submucosa</label>
+          </div>
+        </div>
+
+        <div class="cleft-section">
+          <h4>Extensión</h4>
+          <div class="radio-row">
+            <label><input type="radio" name="cleft_extent" value="incomplete"> Incompleta</label>
+            <label><input type="radio" name="cleft_extent" value="complete"> Completa</label>
+            <label><input type="radio" name="cleft_extent" value="microform"> Microforma</label>
+          </div>
+        </div>
+
+        <div class="cleft-section">
+          <h4>Estructuras afectadas</h4>
+          <p style="font-size: 12px; color: var(--ink-3); margin-bottom: 8px;">Click en el esquema o marcá manualmente:</p>
+          <div class="check-row">
+            <label><input type="checkbox" class="cleft-struct" data-region="lip_right"> Labio derecho</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="lip_left"> Labio izquierdo</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="alveolus_right"> Alvéolo derecho</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="alveolus_left"> Alvéolo izquierdo</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="hard_palate_right"> Paladar duro derecho</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="hard_palate_left"> Paladar duro izquierdo</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="soft_palate_right"> Paladar blando derecho</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="soft_palate_left"> Paladar blando izquierdo</label>
+            <label><input type="checkbox" class="cleft-struct" data-region="uvula"> Úvula bífida</label>
+          </div>
+        </div>
+
+        <div class="cleft-section">
+          <h4>Cirugías realizadas</h4>
+          <div class="check-row">
+            <label><input type="checkbox" id="surg_queilo"> Queiloplastia</label>
+            <label><input type="checkbox" id="surg_palato"> Palatoplastia</label>
+            <label><input type="checkbox" id="surg_injerto"> Injerto óseo alveolar</label>
+            <label><input type="checkbox" id="surg_rinoplastia"> Rinoplastia</label>
+            <label><input type="checkbox" id="surg_otra"> Otra (ver notas)</label>
+          </div>
+          <textarea id="surg_notes" placeholder="Fechas, técnicas, complicaciones..." style="margin-top:10px; width:100%; min-height:50px; border:1px solid var(--line); padding:8px; font-family:inherit; font-size:13px; background:var(--bg);"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FINDINGS PANEL -->
+  <div class="panel" id="panel-findings">
+    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin-bottom:14px;">Hallazgos extraorales</h3>
+    <div class="findings">
+      <div class="finding-card"><h4>Cabeza</h4><textarea data-finding="cabeza"></textarea></div>
+      <div class="finding-card"><h4>Cara</h4><textarea data-finding="cara"></textarea></div>
+      <div class="finding-card"><h4>Ojos</h4><textarea data-finding="ojos"></textarea></div>
+      <div class="finding-card"><h4>Orejas</h4><textarea data-finding="orejas"></textarea></div>
+      <div class="finding-card"><h4>Cuello</h4><textarea data-finding="cuello"></textarea></div>
+      <div class="finding-card"><h4>ATM</h4><textarea data-finding="atm"></textarea></div>
+      <div class="finding-card"><h4>Manos</h4><textarea data-finding="manos"></textarea></div>
+      <div class="finding-card"><h4>Pies</h4><textarea data-finding="pies"></textarea></div>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:28px 0 14px;">Hallazgos intraorales</h3>
+    <div class="findings">
+      <div class="finding-card"><h4>Filtrum</h4><textarea data-finding="filtrum"></textarea></div>
+      <div class="finding-card"><h4>Lengua</h4><textarea data-finding="lengua"></textarea></div>
+      <div class="finding-card"><h4>Mucosa de carrillos</h4><textarea data-finding="mucosa_carrillos"></textarea></div>
+      <div class="finding-card"><h4>Mucosa de labios</h4><textarea data-finding="mucosa_labios"></textarea></div>
+    </div>
+
+    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:28px 0 14px;">Factores de riesgo cariogénico</h3>
+    <div class="risk-row">
+      <div class="field">
+        <label>¿Sangrado de encías?</label>
+        <select id="risk_bleeding">
+          <option value="">—</option>
+          <option value="never">Nunca</option>
+          <option value="occasional">Ocasional</option>
+          <option value="frequent">Frecuente</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>¿Consumo de azúcar?</label>
+        <select id="risk_sugar">
+          <option value="">—</option>
+          <option value="low">Bajo</option>
+          <option value="moderate">Moderado</option>
+          <option value="high">Alto</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Tipo de azúcar predominante</label>
+        <select id="risk_sugar_type">
+          <option value="">—</option>
+          <option value="natural">Natural (frutas)</option>
+          <option value="processed">Procesado</option>
+          <option value="beverages">Bebidas azucaradas</option>
+          <option value="mixed">Mixto</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="finding-card" style="margin-top:24px;">
+      <h4>Razón complicaciones dentales / Descartar síndrome / Referencia</h4>
+      <textarea data-finding="general_notes" style="min-height:90px;"></textarea>
+    </div>
+  </div>
+
+  <!-- EXPORT BAR -->
+  <div class="export-bar">
+    <h3>Salida de datos</h3>
+    <div class="actions">
+      <button class="btn" id="btnViewJson">Ver JSON</button>
+      <button class="btn" id="btnCopyJson">Copiar JSON</button>
+      <button class="btn primary" id="btnSimulate">Guardar en Bitrix</button>
+      <button class="btn-danger btn" id="btnReset">Reset</button>
+    </div>
+  </div>
+
+  <pre class="json-viewer" id="jsonViewer"></pre>
+
+</div>
+
+<!-- TOOTH MODAL -->
+<div class="modal-backdrop" id="toothModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3 id="modalTitle">Diente</h3>
+        <div class="tooth-id" id="modalToothId">FDI: —</div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="whole-tooth-section">
+        <h5>Estado del diente completo</h5>
+        <select id="wholeToothState">
+          <option value="">— Ninguno (usar caras) —</option>
+          <option value="ausente_clinica">Ausente (clínica)</option>
+          <option value="ausente_congenita">Agenesia (ausencia congénita)</option>
+          <option value="extraccion_indicada">Extracción indicada</option>
+          <option value="erupcion">En erupción</option>
+          <option value="impactado">Impactado</option>
+          <option value="implante">Implante</option>
+          <option value="corona_total">Corona total</option>
+          <option value="endodoncia">Endodoncia</option>
+          <option value="protesis_fija">Prótesis fija</option>
+          <option value="supernumerario">Supernumerario</option>
+          <option value="fractura">Fractura</option>
+          <option value="movilidad">Movilidad</option>
+        </select>
+      </div>
+
+      <div class="face-selector" id="faceSelector">
+        <div class="face-row">
+          <label>Oclusal/Incisal</label>
+          <select data-face="O">
+            <option value="sano">Sano</option>
+            <option value="caries">Caries</option>
+            <option value="obturado">Obturado</option>
+            <option value="sellante">Sellante</option>
+            <option value="fractura">Fractura</option>
+          </select>
+        </div>
+        <div class="face-row">
+          <label>Mesial</label>
+          <select data-face="M">
+            <option value="sano">Sano</option>
+            <option value="caries">Caries</option>
+            <option value="obturado">Obturado</option>
+            <option value="fractura">Fractura</option>
+          </select>
+        </div>
+        <div class="face-row">
+          <label>Distal</label>
+          <select data-face="D">
+            <option value="sano">Sano</option>
+            <option value="caries">Caries</option>
+            <option value="obturado">Obturado</option>
+            <option value="fractura">Fractura</option>
+          </select>
+        </div>
+        <div class="face-row">
+          <label>Vestibular</label>
+          <select data-face="V">
+            <option value="sano">Sano</option>
+            <option value="caries">Caries</option>
+            <option value="obturado">Obturado</option>
+            <option value="fractura">Fractura</option>
+          </select>
+        </div>
+        <div class="face-row">
+          <label>Lingual/Palatino</label>
+          <select data-face="L">
+            <option value="sano">Sano</option>
+            <option value="caries">Caries</option>
+            <option value="obturado">Obturado</option>
+            <option value="fractura">Fractura</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-3);">Notas del diente</label>
+        <textarea id="toothNotes" placeholder="Observaciones específicas..." style="margin-top:6px;"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="modalClear">Limpiar diente</button>
+      <button class="btn" id="modalSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ============================================================
+// CONFIG
+// ============================================================
+const WORKER_URL = 'https://odontograma-api.amatheu.workers.dev';
+
+const FDI_PERMANENT = {
+  upperRight: [18, 17, 16, 15, 14, 13, 12, 11],
+  upperLeft:  [21, 22, 23, 24, 25, 26, 27, 28],
+  lowerRight: [48, 47, 46, 45, 44, 43, 42, 41],
+  lowerLeft:  [31, 32, 33, 34, 35, 36, 37, 38]
+};
+const FDI_DECIDUOUS = {
+  upperRight: [55, 54, 53, 52, 51],
+  upperLeft:  [61, 62, 63, 64, 65],
+  lowerRight: [85, 84, 83, 82, 81],
+  lowerLeft:  [71, 72, 73, 74, 75]
+};
+
+const CONDITION_COLORS = {
+  sano: 'var(--c-sano)',
+  caries: 'var(--c-caries)',
+  obturado: 'var(--c-obturado)',
+  corona_total: 'var(--c-corona)',
+  endodoncia: 'var(--c-endodoncia)',
+  extraccion_indicada: 'var(--c-extraccion)',
+  ausente_clinica: 'var(--c-ausente)',
+  ausente_congenita: 'var(--c-agenesia)',
+  implante: 'var(--c-implante)',
+  fractura: 'var(--c-fractura)',
+  sellante: 'var(--c-sellante)',
+  protesis_fija: 'var(--c-protesis)',
+  supernumerario: 'var(--c-supernumerario)'
+};
+
+const LEGEND_ITEMS = [
+  { label: 'Sano', color: 'var(--c-sano)' },
+  { label: 'Caries', color: 'var(--c-caries)' },
+  { label: 'Obturado', color: 'var(--c-obturado)' },
+  { label: 'Corona', color: 'var(--c-corona)' },
+  { label: 'Endodoncia', color: 'var(--c-endodoncia)' },
+  { label: 'Sellante', color: 'var(--c-sellante)' },
+  { label: 'Ausente', color: 'var(--c-ausente)' },
+  { label: 'Implante', color: 'var(--c-implante)' }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  patient: { id: '', name: '', exam_date: '', practitioner: '' },
+  dentition_mode: 'permanent', // permanent | mixed | deciduous
+  teeth: {}, // { "55": { faces: {O,M,D,V,L}, whole: null, notes: '' } }
+  cleft: {
+    type: 'none',
+    extent: null,
+    structures: [],
+    surgeries: { queilo: false, palato: false, injerto: false, rinoplastia: false, otra: false, notes: '' }
+  },
+  findings: {},
+  risk: { bleeding: '', sugar: '', sugar_type: '' }
+};
+
+let currentTooth = null;
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('examDate').valueAsDate = new Date();
+  document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' });
+  buildLegend();
+  renderArches();
+  bindEvents();
+});
+
+function buildLegend() {
+  const el = document.getElementById('legend');
+  el.innerHTML = LEGEND_ITEMS.map(i =>
+    `<div class="legend-item"><span class="legend-swatch" style="background:${i.color}"></span>${i.label}</div>`
+  ).join('');
+}
+
+// ============================================================
+// TOOTH SVG
+// ============================================================
+function toothSVG(fdi, isDeciduous) {
+  // 5 faces layout: top=Vestibular, bottom=Lingual, left=Mesial (upper-right) or Distal,
+  // right=Distal or Mesial, center=Oclusal
+  // For simplicity we orient: Top=V, Bottom=L, center=O, and L/R sides = M/D depending on quadrant
+  // Determine if M is on left or right based on quadrant
+  const q = Math.floor(fdi / 10);
+  // Cuadrants 1, 4 (right side of patient) → mesial is on the right of the SVG (toward midline)
+  // Cuadrants 2, 3 (left side of patient) → mesial is on the left of the SVG (toward midline)
+  const mesialOnRight = (q === 1 || q === 4 || q === 5 || q === 8);
+
+  const w = isDeciduous ? 32 : 38;
+  const h = isDeciduous ? 40 : 48;
+
+  // 5-face square diagram
+  // Outer square 30x30 centered; faces are trapezoids meeting at center
+  const cx = w / 2;
+  const top = 4;
+  const bottom = h - 4;
+  const left = isDeciduous ? 4 : 4;
+  const right = w - 4;
+  const innerTop = top + (bottom - top) * 0.3;
+  const innerBottom = bottom - (bottom - top) * 0.3;
+  const innerLeft = left + (right - left) * 0.3;
+  const innerRight = right - (right - left) * 0.3;
+
+  // Vestibular = top, Lingual = bottom, Oclusal = center
+  // Mesial / Distal on sides depending on mesialOnRight
+  const leftFace = mesialOnRight ? 'D' : 'M';
+  const rightFace = mesialOnRight ? 'M' : 'D';
+
+  return `
+    <svg class="tooth-svg ${isDeciduous ? 'deciduous' : ''}" viewBox="0 0 ${w} ${h}" data-fdi="${fdi}">
+      <!-- Vestibular (top) -->
+      <polygon class="face" data-face="V" data-fdi="${fdi}"
+        points="${left},${top} ${right},${top} ${innerRight},${innerTop} ${innerLeft},${innerTop}"/>
+      <!-- Lingual (bottom) -->
+      <polygon class="face" data-face="L" data-fdi="${fdi}"
+        points="${innerLeft},${innerBottom} ${innerRight},${innerBottom} ${right},${bottom} ${left},${bottom}"/>
+      <!-- Left side -->
+      <polygon class="face" data-face="${leftFace}" data-fdi="${fdi}"
+        points="${left},${top} ${innerLeft},${innerTop} ${innerLeft},${innerBottom} ${left},${bottom}"/>
+      <!-- Right side -->
+      <polygon class="face" data-face="${rightFace}" data-fdi="${fdi}"
+        points="${innerRight},${innerTop} ${right},${top} ${right},${bottom} ${innerRight},${innerBottom}"/>
+      <!-- Oclusal (center) -->
+      <rect class="face" data-face="O" data-fdi="${fdi}"
+        x="${innerLeft}" y="${innerTop}"
+        width="${innerRight - innerLeft}" height="${innerBottom - innerTop}"/>
+      <!-- Outline -->
+      <rect class="tooth-outline" x="${left}" y="${top}" width="${right-left}" height="${bottom-top}"/>
+    </svg>
+  `;
+}
+
+function renderArches() {
+  const upper = document.getElementById('archUpper');
+  const lower = document.getElementById('archLower');
+
+  const mode = state.dentition_mode;
+  let upperRight, upperLeft, lowerRight, lowerLeft;
+
+  if (mode === 'permanent') {
+    upperRight = FDI_PERMANENT.upperRight;
+    upperLeft  = FDI_PERMANENT.upperLeft;
+    lowerRight = FDI_PERMANENT.lowerRight;
+    lowerLeft  = FDI_PERMANENT.lowerLeft;
+  } else if (mode === 'deciduous') {
+    upperRight = FDI_DECIDUOUS.upperRight;
+    upperLeft  = FDI_DECIDUOUS.upperLeft;
+    lowerRight = FDI_DECIDUOUS.lowerRight;
+    lowerLeft  = FDI_DECIDUOUS.lowerLeft;
+  } else { // mixed
+    upperRight = [...FDI_PERMANENT.upperRight.slice(0, 3), ...FDI_DECIDUOUS.upperRight];
+    upperLeft  = [...FDI_DECIDUOUS.upperLeft, ...FDI_PERMANENT.upperLeft.slice(5)];
+    lowerRight = [...FDI_PERMANENT.lowerRight.slice(0, 3), ...FDI_DECIDUOUS.lowerRight];
+    lowerLeft  = [...FDI_DECIDUOUS.lowerLeft, ...FDI_PERMANENT.lowerLeft.slice(5)];
+  }
+
+  upper.innerHTML = `
+    <div class="arch-half left">${upperRight.map(t => toothBlock(t, isDecid(t))).join('')}</div>
+    <div class="arch-half right">${upperLeft.map(t => toothBlock(t, isDecid(t))).join('')}</div>
+  `;
+  lower.innerHTML = `
+    <div class="arch-half left">${lowerRight.map(t => toothBlock(t, isDecid(t))).join('')}</div>
+    <div class="arch-half right">${lowerLeft.map(t => toothBlock(t, isDecid(t))).join('')}</div>
+  `;
+
+  // Apply existing state visuals
+  Object.keys(state.teeth).forEach(fdi => applyToothVisuals(fdi));
+}
+
+function isDecid(fdi) {
+  const q = Math.floor(fdi / 10);
+  return q >= 5 && q <= 8;
+}
+
+function toothBlock(fdi, isDeciduous) {
+  const hasData = !!state.teeth[fdi];
+  return `
+    <div class="tooth ${hasData ? 'has-data' : ''}" data-fdi="${fdi}">
+      <div class="tooth-num">${fdi}</div>
+      ${toothSVG(fdi, isDeciduous)}
+    </div>
+  `;
+}
+
+function applyToothVisuals(fdi) {
+  const tooth = state.teeth[fdi];
+  if (!tooth) return;
+  const toothEl = document.querySelector(`.tooth[data-fdi="${fdi}"]`);
+  if (!toothEl) return;
+
+  toothEl.classList.toggle('has-data', true);
+
+  // If whole-tooth state set, override face colors
+  if (tooth.whole) {
+    const color = CONDITION_COLORS[tooth.whole] || 'var(--c-ausente)';
+    toothEl.querySelectorAll('.face').forEach(f => f.style.fill = color);
+    toothEl.classList.toggle('absent',
+      tooth.whole === 'ausente_clinica' || tooth.whole === 'ausente_congenita');
+  } else {
+    toothEl.classList.remove('absent');
+    if (tooth.faces) {
+      ['O','M','D','V','L'].forEach(face => {
+        const cond = tooth.faces[face] || 'sano';
+        const el = toothEl.querySelector(`[data-face="${face}"]`);
+        if (el) el.style.fill = CONDITION_COLORS[cond] || 'var(--c-sano)';
+      });
+    }
+  }
+}
+
+// ============================================================
+// EVENTS
+// ============================================================
+function bindEvents() {
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // Dentition toggle
+  document.querySelectorAll('#dentitionToggle .toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#dentitionToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.dentition_mode = btn.dataset.mode;
+      renderArches();
+    });
+  });
+
+  // Tooth click - delegate
+  document.addEventListener('click', e => {
+    const face = e.target.closest('.face');
+    const toothNum = e.target.closest('.tooth-num');
+    const tooth = e.target.closest('.tooth');
+
+    if (face) {
+      const fdi = face.dataset.fdi;
+      openToothModal(fdi);
+    } else if (toothNum && tooth) {
+      const fdi = tooth.dataset.fdi;
+      openToothModal(fdi);
+    }
+  });
+
+  // Modal
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('toothModal').addEventListener('click', e => {
+    if (e.target.id === 'toothModal') closeModal();
+  });
+  document.getElementById('modalSave').addEventListener('click', saveModal);
+  document.getElementById('modalClear').addEventListener('click', clearTooth);
+
+  // Patient fields
+  document.getElementById('patientId').addEventListener('input', e => state.patient.id = e.target.value);
+  document.getElementById('patientName').addEventListener('input', e => state.patient.name = e.target.value);
+  document.getElementById('examDate').addEventListener('change', e => state.patient.exam_date = e.target.value);
+  document.getElementById('practitioner').addEventListener('input', e => state.patient.practitioner = e.target.value);
+
+  // Cleft
+  document.querySelectorAll('input[name="cleft_type"]').forEach(r => {
+    r.addEventListener('change', e => state.cleft.type = e.target.value);
+  });
+  document.querySelectorAll('input[name="cleft_extent"]').forEach(r => {
+    r.addEventListener('change', e => state.cleft.extent = e.target.value);
+  });
+  document.querySelectorAll('.cleft-struct').forEach(c => {
+    c.addEventListener('change', () => syncCleftStructures());
+  });
+  document.querySelectorAll('.cleft-region').forEach(r => {
+    r.addEventListener('click', () => {
+      const region = r.dataset.region;
+      const cb = document.querySelector(`.cleft-struct[data-region="${region}"]`);
+      if (cb) {
+        cb.checked = !cb.checked;
+        syncCleftStructures();
+      }
+    });
+  });
+
+  ['queilo','palato','injerto','rinoplastia','otra'].forEach(s => {
+    document.getElementById('surg_' + s).addEventListener('change', e => {
+      state.cleft.surgeries[s] = e.target.checked;
+    });
+  });
+  document.getElementById('surg_notes').addEventListener('input', e => state.cleft.surgeries.notes = e.target.value);
+
+  // Findings
+  document.querySelectorAll('[data-finding]').forEach(t => {
+    t.addEventListener('input', e => state.findings[e.target.dataset.finding] = e.target.value);
+  });
+
+  // Risk
+  document.getElementById('risk_bleeding').addEventListener('change', e => state.risk.bleeding = e.target.value);
+  document.getElementById('risk_sugar').addEventListener('change', e => state.risk.sugar = e.target.value);
+  document.getElementById('risk_sugar_type').addEventListener('change', e => state.risk.sugar_type = e.target.value);
+
+  // Export
+  document.getElementById('btnViewJson').addEventListener('click', toggleJson);
+  document.getElementById('btnCopyJson').addEventListener('click', copyJson);
+  document.getElementById('btnSimulate').addEventListener('click', simulateSend);
+  document.getElementById('btnReset').addEventListener('click', resetAll);
+}
+
+function syncCleftStructures() {
+  state.cleft.structures = Array.from(document.querySelectorAll('.cleft-struct:checked')).map(c => c.dataset.region);
+  document.querySelectorAll('.cleft-region').forEach(r => {
+    r.classList.toggle('affected', state.cleft.structures.includes(r.dataset.region));
+  });
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openToothModal(fdi) {
+  currentTooth = fdi;
+  const tooth = state.teeth[fdi] || { faces: {}, whole: null, notes: '' };
+
+  document.getElementById('modalTitle').textContent = `Diente ${fdi}`;
+  const isDecid = (Math.floor(fdi/10) >= 5);
+  document.getElementById('modalToothId').textContent =
+    `FDI: ${fdi} · ${isDecid ? 'Temporal' : 'Permanente'} · ${getToothName(fdi)}`;
+
+  document.getElementById('wholeToothState').value = tooth.whole || '';
+  document.querySelectorAll('#faceSelector select').forEach(sel => {
+    const face = sel.dataset.face;
+    sel.value = (tooth.faces && tooth.faces[face]) || 'sano';
+  });
+  document.getElementById('toothNotes').value = tooth.notes || '';
+
+  document.getElementById('toothModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('toothModal').classList.remove('open');
+  currentTooth = null;
+}
+
+function saveModal() {
+  if (!currentTooth) return;
+  const whole = document.getElementById('wholeToothState').value || null;
+  const faces = {};
+  document.querySelectorAll('#faceSelector select').forEach(sel => {
+    faces[sel.dataset.face] = sel.value;
+  });
+  const notes = document.getElementById('toothNotes').value;
+
+  // Only save if there's something meaningful
+  const hasFaceData = Object.values(faces).some(v => v !== 'sano');
+  if (whole || hasFaceData || notes) {
+    state.teeth[currentTooth] = { whole, faces, notes };
+  } else {
+    delete state.teeth[currentTooth];
+  }
+  renderArches();
+  closeModal();
+  showToast(`Diente ${currentTooth} guardado`);
+}
+
+function clearTooth() {
+  if (!currentTooth) return;
+  delete state.teeth[currentTooth];
+  renderArches();
+  closeModal();
+  showToast(`Diente ${currentTooth} reiniciado`);
+}
+
+function getToothName(fdi) {
+  const pos = fdi % 10;
+  const isDecid = Math.floor(fdi/10) >= 5;
+  const names = isDecid ?
+    {1:'Incisivo central',2:'Incisivo lateral',3:'Canino',4:'1er molar',5:'2do molar'} :
+    {1:'Incisivo central',2:'Incisivo lateral',3:'Canino',4:'1er premolar',5:'2do premolar',6:'1er molar',7:'2do molar',8:'3er molar'};
+  return names[pos] || '';
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function buildPayload() {
+  return {
+    schema_version: '0.1',
+    notation: 'FDI',
+    patient: {
+      bitrix_company_id: state.patient.id || null,
+      display_name: state.patient.name || null,
+      exam_date: state.patient.exam_date || null,
+      practitioner: state.patient.practitioner || null
+    },
+    dentition_mode: state.dentition_mode,
+    teeth: state.teeth,
+    cleft: state.cleft,
+    extraoral_findings: {
+      cabeza: state.findings.cabeza || '',
+      cara: state.findings.cara || '',
+      ojos: state.findings.ojos || '',
+      orejas: state.findings.orejas || '',
+      cuello: state.findings.cuello || '',
+      atm: state.findings.atm || '',
+      manos: state.findings.manos || '',
+      pies: state.findings.pies || ''
+    },
+    intraoral_findings: {
+      filtrum: state.findings.filtrum || '',
+      lengua: state.findings.lengua || '',
+      mucosa_carrillos: state.findings.mucosa_carrillos || '',
+      mucosa_labios: state.findings.mucosa_labios || ''
+    },
+    risk_factors: state.risk,
+    general_notes: state.findings.general_notes || '',
+    generated_at: new Date().toISOString()
+  };
+}
+
+function toggleJson() {
+  const v = document.getElementById('jsonViewer');
+  if (v.classList.contains('open')) {
+    v.classList.remove('open');
+  } else {
+    v.textContent = JSON.stringify(buildPayload(), null, 2);
+    v.classList.add('open');
+  }
+}
+
+function copyJson() {
+  const json = JSON.stringify(buildPayload(), null, 2);
+  navigator.clipboard.writeText(json).then(() => showToast('JSON copiado al portapapeles'));
+}
+
+async function simulateSend() {
+  // Validación previa
+  if (!state.patient.id || !state.patient.id.toString().trim()) {
+    showToast('Falta el ID del paciente');
+    return;
+  }
+  if (Object.keys(state.teeth).length === 0 &&
+      !Object.values(state.findings).some(v => v && v.trim())) {
+    if (!confirm('No hay datos del odontograma cargados. ¿Guardar de todas formas?')) return;
+  }
+
+  const payload = buildPayload();
+  const btn = document.getElementById('btnSimulate');
+  const originalText = btn.textContent;
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+
+  const v = document.getElementById('jsonViewer');
+
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok || data.error) {
+      throw new Error(data.error || `HTTP ${resp.status}`);
+    }
+
+    // Éxito
+    v.textContent =
+      '✓ GUARDADO EN BITRIX\n\n' +
+      `Registro Dental ID: ${data.bitrix_dental_id}\n` +
+      `Paciente ID: ${data.patient_id}\n` +
+      `Campos escritos: ${data.fields_written}\n\n` +
+      '--- Payload enviado ---\n' +
+      JSON.stringify(payload, null, 2);
+    v.classList.add('open');
+    showToast(`✓ Guardado · Dental #${data.bitrix_dental_id}`);
+  } catch (err) {
+    v.textContent =
+      '✗ ERROR AL GUARDAR\n\n' +
+      `Mensaje: ${err.message}\n\n` +
+      '--- Payload que se intentó enviar ---\n' +
+      JSON.stringify(payload, null, 2);
+    v.classList.add('open');
+    showToast(`✗ Error: ${err.message}`);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+function resetAll() {
+  if (!confirm('¿Reiniciar todo el odontograma? Esta acción no se puede deshacer.')) return;
+  state.patient = { id: '', name: '', exam_date: '', practitioner: '' };
+  state.teeth = {};
+  state.cleft = { type: 'none', extent: null, structures: [], surgeries: { queilo: false, palato: false, injerto: false, rinoplastia: false, otra: false, notes: '' } };
+  state.findings = {};
+  state.risk = { bleeding: '', sugar: '', sugar_type: '' };
+  document.getElementById('patientId').value = '';
+  document.getElementById('patientName').value = '';
+  document.getElementById('practitioner').value = '';
+  document.querySelectorAll('input[name="cleft_type"]')[0].checked = true;
+  document.querySelectorAll('input[name="cleft_extent"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.cleft-struct').forEach(c => c.checked = false);
+  document.querySelectorAll('.cleft-region').forEach(r => r.classList.remove('affected'));
+  ['queilo','palato','injerto','rinoplastia','otra'].forEach(s => document.getElementById('surg_' + s).checked = false);
+  document.getElementById('surg_notes').value = '';
+  document.querySelectorAll('[data-finding]').forEach(t => t.value = '');
+  document.getElementById('risk_bleeding').value = '';
+  document.getElementById('risk_sugar').value = '';
+  document.getElementById('risk_sugar_type').value = '';
+  renderArches();
+  document.getElementById('jsonViewer').classList.remove('open');
+  showToast('Odontograma reiniciado');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+</script>
+</body>
+</html>
