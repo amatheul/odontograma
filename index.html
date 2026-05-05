@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Odontograma — FactusRH</title>
+<title>Odontograma Clínico — Sonrisa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,15 +12,17 @@
     --bg: #fafaf7;
     --surface: #ffffff;
     --surface-2: #f4f3ee;
+    --surface-3: #ebe9e1;
     --ink: #1a1a1a;
     --ink-2: #4a4a4a;
     --ink-3: #8a8a86;
+    --ink-4: #b8b6ae;
     --line: #e5e3dc;
     --line-2: #d4d2ca;
     --accent: #1f4e4a;
     --accent-2: #2d6b66;
+    --warn: #c2410c;
 
-    /* Condition colors - semantic, distinguishable, print-safe */
     --c-sano: #ffffff;
     --c-caries: #d64545;
     --c-obturado: #2563eb;
@@ -34,6 +36,9 @@
     --c-protesis: #a855f7;
     --c-supernumerario: #ec4899;
     --c-agenesia: #6b7280;
+    --c-erupcion: #fef3c7;
+    --c-impactado: #fcd34d;
+    --c-movilidad: #fb923c;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -57,7 +62,7 @@
   .app {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 32px 24px 80px;
+    padding: 32px 24px 120px;
   }
 
   /* ===== HEADER ===== */
@@ -67,7 +72,7 @@
     align-items: flex-end;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--line);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
   }
   .brand {
     font-family: 'Fraunces', serif;
@@ -99,17 +104,18 @@
   /* ===== PATIENT BAR ===== */
   .patient-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr 200px 200px;
+    grid-template-columns: 160px 160px 1fr 180px 200px;
     gap: 16px;
     background: var(--surface);
     border: 1px solid var(--line);
     padding: 18px 20px;
-    margin-bottom: 24px;
+    margin-bottom: 12px;
   }
   .field {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
   }
   .field label {
     font-family: 'JetBrains Mono', monospace;
@@ -118,7 +124,7 @@
     letter-spacing: 0.1em;
     color: var(--ink-3);
   }
-  .field input, .field select {
+  .field input, .field select, .field textarea {
     border: none;
     border-bottom: 1px solid var(--line-2);
     background: transparent;
@@ -127,22 +133,31 @@
     font-size: 14px;
     color: var(--ink);
     transition: border-color 0.15s;
+    width: 100%;
   }
-  .field input:focus, .field select:focus {
+  .field input:focus, .field select:focus, .field textarea:focus {
     outline: none;
     border-bottom-color: var(--accent);
   }
-  .field input::placeholder { color: var(--ink-3); }
+  .field input::placeholder { color: var(--ink-4); }
+
+  .field.boxed input, .field.boxed select, .field.boxed textarea {
+    border: 1px solid var(--line);
+    padding: 8px 10px;
+    background: var(--bg);
+  }
+  .field.boxed textarea { min-height: 60px; resize: vertical; }
 
   /* ===== TABS ===== */
   .tabs {
     display: flex;
     gap: 0;
     border-bottom: 1px solid var(--line);
-    margin-bottom: 28px;
+    margin-bottom: 24px;
+    overflow-x: auto;
   }
   .tab {
-    padding: 12px 20px;
+    padding: 12px 18px;
     border: none;
     background: transparent;
     font-family: 'IBM Plex Sans', sans-serif;
@@ -154,11 +169,22 @@
     margin-bottom: -1px;
     transition: all 0.15s;
     letter-spacing: 0.01em;
+    white-space: nowrap;
   }
   .tab:hover { color: var(--ink-2); }
   .tab.active {
     color: var(--ink);
     border-bottom-color: var(--accent);
+  }
+  .tab-count {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    border-radius: 8px;
   }
 
   .panel { display: none; }
@@ -198,7 +224,7 @@
 
   .legend {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     flex-wrap: wrap;
     align-items: center;
   }
@@ -213,16 +239,6 @@
     width: 12px;
     height: 12px;
     border: 1px solid var(--line-2);
-  }
-
-  .arch-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--ink-3);
-    text-align: center;
-    margin: 12px 0 4px;
   }
 
   .quadrant-labels {
@@ -249,7 +265,6 @@
   .arch-divider {
     height: 1px;
     background: var(--line-2);
-    margin: 0;
   }
   .arch-half {
     display: flex;
@@ -259,7 +274,6 @@
   .arch-half.left { border-right: 1px dashed var(--line-2); padding-right: 16px; }
   .arch-half.right { padding-left: 16px; }
 
-  /* ===== TOOTH ===== */
   .tooth {
     display: flex;
     flex-direction: column;
@@ -301,110 +315,121 @@
   .tooth.absent .face { fill: var(--c-ausente); opacity: 0.4; }
   .tooth.absent .tooth-svg { opacity: 0.5; }
 
-  /* Whole-tooth overlay markers */
-  .whole-marker {
-    pointer-events: none;
-    stroke: var(--ink);
-    stroke-width: 1.5;
-    fill: none;
-  }
-
-  /* ===== CLEFT PANEL ===== */
-  .cleft-grid {
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    gap: 32px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    padding: 28px;
-  }
-
-  .cleft-svg-wrap {
-    background: var(--surface-2);
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .cleft-region {
-    fill: #f9d4c9;
-    stroke: var(--ink);
-    stroke-width: 1.2;
-    cursor: pointer;
-    transition: fill 0.15s;
-  }
-  .cleft-region:hover { fill: #ffb3a0; }
-  .cleft-region.affected { fill: var(--c-caries); }
-  .cleft-label {
+  .odo-tip {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    fill: var(--ink-2);
-    pointer-events: none;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    text-align: center;
+    margin-top: 24px;
   }
 
-  .cleft-form { display: flex; flex-direction: column; gap: 18px; }
-  .cleft-section {
-    border-left: 2px solid var(--accent);
-    padding-left: 14px;
-  }
-  .cleft-section h4 {
-    font-family: 'Fraunces', serif;
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .radio-row { display: flex; gap: 14px; flex-wrap: wrap; }
-  .radio-row label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    font-size: 13px;
-  }
-  .check-row { display: flex; flex-direction: column; gap: 6px; }
-  .check-row label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 13px;
-  }
-
-  /* ===== FINDINGS PANEL ===== */
-  .findings {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .finding-card {
+  /* ===== CLINICAL FORM SECTIONS ===== */
+  .section {
     background: var(--surface);
     border: 1px solid var(--line);
-    padding: 16px;
+    margin-bottom: 16px;
   }
-  .finding-card h4 {
+  .section-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .section-head h3 {
     font-family: 'Fraunces', serif;
-    font-size: 14px;
+    font-size: 17px;
     font-weight: 600;
-    margin-bottom: 10px;
-    color: var(--accent);
+    letter-spacing: -0.01em;
   }
-  .finding-card textarea {
-    width: 100%;
-    min-height: 60px;
-    border: 1px solid var(--line);
-    padding: 8px 10px;
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    resize: vertical;
+  .section-head .hint {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .section-body {
+    padding: 18px 20px;
+  }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; }
+
+  /* Conditional reveal */
+  .conditional {
+    display: none;
+    margin-top: 12px;
+    padding: 14px;
+    background: var(--surface-2);
+    border-left: 2px solid var(--accent);
+  }
+  .conditional.show { display: block; }
+  .conditional .conditional {
+    background: var(--surface-3);
+    margin-top: 10px;
+  }
+
+  /* Multiselect (chips) */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .chip {
+    padding: 5px 11px;
+    border: 1px solid var(--line-2);
     background: var(--bg);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    border-radius: 16px;
   }
-  .finding-card textarea:focus {
-    outline: none;
-    border-color: var(--accent);
+  .chip:hover { border-color: var(--ink-3); }
+  .chip.active {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
   }
+
+  /* Surgery rows */
+  .surgery-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .surgery-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2fr 32px;
+    gap: 8px;
+    align-items: end;
+  }
+  .surgery-add {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px dashed var(--line-2);
+    color: var(--ink-3);
+    font-size: 12px;
+    cursor: pointer;
+    width: 100%;
+  }
+  .surgery-add:hover { border-color: var(--ink); color: var(--ink); }
+  .surgery-remove {
+    background: transparent;
+    border: none;
+    color: var(--ink-4);
+    cursor: pointer;
+    font-size: 16px;
+    height: 32px;
+  }
+  .surgery-remove:hover { color: var(--c-extraccion); }
 
   /* ===== MODAL ===== */
   .modal-backdrop {
@@ -420,7 +445,7 @@
   .modal-backdrop.open { display: flex; }
   .modal {
     background: var(--surface);
-    width: 520px;
+    width: 540px;
     max-width: 90vw;
     max-height: 90vh;
     overflow-y: auto;
@@ -470,7 +495,7 @@
   }
   .face-row {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 100px 1fr;
     align-items: center;
     gap: 12px;
   }
@@ -536,7 +561,8 @@
     letter-spacing: 0.02em;
     transition: all 0.15s;
   }
-  .btn:hover { background: var(--accent); border-color: var(--accent); }
+  .btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-secondary {
     background: transparent;
     color: var(--ink);
@@ -549,38 +575,45 @@
   }
   .btn-danger:hover { background: var(--c-extraccion); color: white; }
 
-  /* ===== EXPORT BAR ===== */
-  .export-bar {
-    margin-top: 32px;
-    padding: 20px 24px;
+  /* ===== FOOTER BAR ===== */
+  .save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background: var(--ink);
     color: var(--bg);
+    padding: 14px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
-    flex-wrap: wrap;
+    z-index: 50;
+    border-top: 2px solid var(--accent);
   }
-  .export-bar h3 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-size: 16px;
+  .save-bar .info {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-4);
+    letter-spacing: 0.04em;
   }
-  .export-bar .actions { display: flex; gap: 10px; }
-  .export-bar .btn {
+  .save-bar .info strong { color: white; font-weight: 500; }
+  .save-bar .actions { display: flex; gap: 10px; }
+  .save-bar .btn {
     background: transparent;
     color: var(--bg);
+    border-color: rgba(255,255,255,0.3);
+  }
+  .save-bar .btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.1);
     border-color: var(--bg);
   }
-  .export-bar .btn:hover {
+  .save-bar .btn.primary {
     background: var(--bg);
     color: var(--ink);
+    border-color: var(--bg);
   }
-  .export-bar .btn.primary {
-    background: var(--bg);
-    color: var(--ink);
-  }
-  .export-bar .btn.primary:hover {
+  .save-bar .btn.primary:hover:not(:disabled) {
     background: var(--accent);
     color: var(--bg);
     border-color: var(--accent);
@@ -589,6 +622,7 @@
   /* ===== JSON VIEWER ===== */
   .json-viewer {
     margin-top: 16px;
+    margin-bottom: 16px;
     background: #1a1a1a;
     color: #e8e8e8;
     padding: 18px;
@@ -605,7 +639,7 @@
 
   .toast {
     position: fixed;
-    bottom: 24px;
+    bottom: 80px;
     right: 24px;
     background: var(--accent);
     color: white;
@@ -618,19 +652,28 @@
     font-family: 'IBM Plex Sans', sans-serif;
   }
   .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--c-extraccion); }
 
-  .risk-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 14px;
-    margin-top: 14px;
+  /* Compact field labels above inputs */
+  .field-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .field-stacked > label {
+    font-size: 12px;
+    color: var(--ink-2);
+    font-weight: 500;
   }
 
-  /* responsive nudges */
-  @media (max-width: 900px) {
-    .cleft-grid { grid-template-columns: 1fr; }
-    .findings { grid-template-columns: 1fr; }
-    .patient-bar { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 1100px) {
+    .patient-bar { grid-template-columns: 1fr 1fr 1fr; }
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .patient-bar { grid-template-columns: 1fr; }
+    .surgery-row { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -640,7 +683,7 @@
   <header>
     <div>
       <div class="brand">Odontograma <span>clínico</span></div>
-      <div class="brand-sub">FactusRH · Bitrix Integration · v0.1</div>
+      <div class="brand-sub">FactusRH · Sonrisa · v0.6</div>
     </div>
     <div class="header-meta">
       Notación FDI · ISO 3950<br>
@@ -651,31 +694,45 @@
   <!-- Patient bar -->
   <div class="patient-bar">
     <div class="field">
-      <label>ID Paciente (Company ID Bitrix)</label>
-      <input type="text" id="patientId" placeholder="Ej: 12345" />
+      <label>ID Paciente</label>
+      <input type="text" id="patientId" placeholder="Ej: 5056" inputmode="numeric" />
     </div>
     <div class="field">
-      <label>Nombre referencia (opcional)</label>
-      <input type="text" id="patientName" placeholder="Solo display local" />
+      <label>ID Voluntario</label>
+      <input type="text" id="volunteerId" placeholder="Ej: 1234" inputmode="numeric" />
     </div>
     <div class="field">
-      <label>Fecha examen</label>
+      <label>Tipo formulario</label>
+      <select id="formType">
+        <option value="">—</option>
+        <option value="15746">Primera Consulta</option>
+        <option value="15748">Consulta de Seguimiento</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Modalidad</label>
+      <select id="modality">
+        <option value="">—</option>
+        <option value="15750">Virtual</option>
+        <option value="15752">Presencial</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Fecha consulta</label>
       <input type="date" id="examDate" />
-    </div>
-    <div class="field">
-      <label>Profesional</label>
-      <input type="text" id="practitioner" placeholder="Dr/a." />
     </div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" data-panel="odontogram">Odontograma</button>
-    <button class="tab" data-panel="cleft">Fisura Labiopalatina</button>
-    <button class="tab" data-panel="findings">Hallazgos & Riesgo</button>
+    <button class="tab active" data-panel="odontogram">Odontograma <span class="tab-count" id="cnt-teeth">0</span></button>
+    <button class="tab" data-panel="cleft">Diagnóstico fisura</button>
+    <button class="tab" data-panel="surgery">Cirugías previas</button>
+    <button class="tab" data-panel="findings">Hallazgos</button>
+    <button class="tab" data-panel="risk">Hábitos &amp; Riesgo</button>
   </div>
 
-  <!-- ODONTOGRAM PANEL -->
+  <!-- ============ ODONTOGRAM ============ -->
   <div class="panel active" id="panel-odontogram">
     <div class="odo-controls">
       <div class="toggle-group" id="dentitionToggle">
@@ -698,179 +755,517 @@
       <span>Cuadrante 3 · Inf. Izq.</span>
     </div>
 
-    <div class="arch-label" style="margin-top:24px">Tip: clic en una cara para asignar condición · clic en el número del diente para opciones de diente completo</div>
+    <div class="odo-tip">Click en cara para asignar condición · Click en número para condición de diente completo</div>
   </div>
 
-  <!-- CLEFT PANEL -->
+  <!-- ============ CLEFT DIAGNOSIS ============ -->
   <div class="panel" id="panel-cleft">
-    <div class="cleft-grid">
-      <div class="cleft-svg-wrap">
-        <svg viewBox="0 0 280 360" width="100%" style="max-width:300px">
-          <!-- Labio superior -->
-          <path id="cleft-lip-r" class="cleft-region" data-region="lip_right"
-                d="M 60 80 Q 100 60 140 75 L 140 115 Q 100 110 60 120 Z"/>
-          <path id="cleft-lip-l" class="cleft-region" data-region="lip_left"
-                d="M 140 75 Q 180 60 220 80 L 220 120 Q 180 110 140 115 Z"/>
 
-          <!-- Filtrum -->
-          <line x1="140" y1="75" x2="140" y2="115" stroke="#1a1a1a" stroke-width="0.5" stroke-dasharray="2,2"/>
-
-          <!-- Alvéolo superior -->
-          <path id="cleft-alv-r" class="cleft-region" data-region="alveolus_right"
-                d="M 65 125 Q 100 130 140 128 L 140 158 Q 100 158 70 165 Z"/>
-          <path id="cleft-alv-l" class="cleft-region" data-region="alveolus_left"
-                d="M 140 128 Q 180 130 215 125 L 210 165 Q 180 158 140 158 Z"/>
-
-          <!-- Paladar duro -->
-          <path id="cleft-pal-r" class="cleft-region" data-region="hard_palate_right"
-                d="M 70 170 Q 100 180 140 178 L 140 245 Q 110 245 80 240 Z"/>
-          <path id="cleft-pal-l" class="cleft-region" data-region="hard_palate_left"
-                d="M 140 178 Q 180 180 210 170 L 200 240 Q 170 245 140 245 Z"/>
-
-          <!-- Paladar blando -->
-          <path id="cleft-soft-r" class="cleft-region" data-region="soft_palate_right"
-                d="M 80 245 Q 110 250 140 248 L 140 295 Q 115 290 90 280 Z"/>
-          <path id="cleft-soft-l" class="cleft-region" data-region="soft_palate_left"
-                d="M 140 248 Q 170 250 200 245 L 190 280 Q 165 290 140 295 Z"/>
-
-          <!-- Úvula -->
-          <ellipse id="cleft-uvula" class="cleft-region" data-region="uvula"
-                   cx="140" cy="310" rx="10" ry="18"/>
-
-          <!-- Labels -->
-          <text class="cleft-label" x="140" y="50" text-anchor="middle">Labio</text>
-          <text class="cleft-label" x="40" y="148" text-anchor="middle">Alvéolo</text>
-          <text class="cleft-label" x="40" y="208" text-anchor="middle">Paladar duro</text>
-          <text class="cleft-label" x="40" y="265" text-anchor="middle">Paladar blando</text>
-          <text class="cleft-label" x="180" y="335" text-anchor="middle">Úvula</text>
-
-          <!-- Side markers -->
-          <text class="cleft-label" x="60" y="20">DER</text>
-          <text class="cleft-label" x="220" y="20">IZQ</text>
-        </svg>
-      </div>
-
-      <div class="cleft-form">
-        <div class="cleft-section">
-          <h4>Tipo de fisura</h4>
-          <div class="radio-row">
-            <label><input type="radio" name="cleft_type" value="none" checked> Sin fisura</label>
-            <label><input type="radio" name="cleft_type" value="unilateral_right"> Unilateral derecha</label>
-            <label><input type="radio" name="cleft_type" value="unilateral_left"> Unilateral izquierda</label>
-            <label><input type="radio" name="cleft_type" value="bilateral"> Bilateral</label>
-            <label><input type="radio" name="cleft_type" value="median"> Mediana</label>
-            <label><input type="radio" name="cleft_type" value="submucosa"> Submucosa</label>
+    <div class="section">
+      <div class="section-head"><h3>Labio</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>Tipo de diagnóstico</label>
+            <select id="lip_type">
+              <option value="">—</option>
+              <option value="17156">Unilateral</option>
+              <option value="17158">Bilateral</option>
+            </select>
           </div>
         </div>
 
-        <div class="cleft-section">
-          <h4>Extensión</h4>
-          <div class="radio-row">
-            <label><input type="radio" name="cleft_extent" value="incomplete"> Incompleta</label>
-            <label><input type="radio" name="cleft_extent" value="complete"> Completa</label>
-            <label><input type="radio" name="cleft_extent" value="microform"> Microforma</label>
+        <!-- UNILATERAL -->
+        <div class="conditional" id="lip_unilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Lado</label>
+              <select id="lip_uni_side">
+                <option value="">—</option>
+                <option value="17164">Derecho</option>
+                <option value="17166">Izquierdo</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción</label>
+              <select id="lip_uni_desc">
+                <option value="">—</option>
+                <option value="17168">Completo</option>
+                <option value="17170">Incompleto</option>
+                <option value="17172">Frustro</option>
+                <option value="17174">Reparado</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final labio unilateral</label>
+            <textarea id="lip_uni_final" rows="2"></textarea>
           </div>
         </div>
 
-        <div class="cleft-section">
-          <h4>Estructuras afectadas</h4>
-          <p style="font-size: 12px; color: var(--ink-3); margin-bottom: 8px;">Click en el esquema o marcá manualmente:</p>
-          <div class="check-row">
-            <label><input type="checkbox" class="cleft-struct" data-region="lip_right"> Labio derecho</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="lip_left"> Labio izquierdo</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="alveolus_right"> Alvéolo derecho</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="alveolus_left"> Alvéolo izquierdo</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="hard_palate_right"> Paladar duro derecho</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="hard_palate_left"> Paladar duro izquierdo</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="soft_palate_right"> Paladar blando derecho</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="soft_palate_left"> Paladar blando izquierdo</label>
-            <label><input type="checkbox" class="cleft-struct" data-region="uvula"> Úvula bífida</label>
+        <!-- BILATERAL -->
+        <div class="conditional" id="lip_bilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Descripción lado derecho</label>
+              <select id="lip_bi_right">
+                <option value="">—</option>
+                <option value="17176">Completo</option>
+                <option value="17178">Incompleto</option>
+                <option value="17180">Frustro</option>
+                <option value="17182">Reparado</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción lado izquierdo</label>
+              <select id="lip_bi_left">
+                <option value="">—</option>
+                <option value="17184">Completo</option>
+                <option value="17186">Incompleto</option>
+                <option value="17188">Frustro</option>
+                <option value="17190">Reparado</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final labio bilateral</label>
+            <textarea id="lip_bi_final" rows="2"></textarea>
           </div>
         </div>
 
-        <div class="cleft-section">
-          <h4>Cirugías realizadas</h4>
-          <div class="check-row">
-            <label><input type="checkbox" id="surg_queilo"> Queiloplastia</label>
-            <label><input type="checkbox" id="surg_palato"> Palatoplastia</label>
-            <label><input type="checkbox" id="surg_injerto"> Injerto óseo alveolar</label>
-            <label><input type="checkbox" id="surg_rinoplastia"> Rinoplastia</label>
-            <label><input type="checkbox" id="surg_otra"> Otra (ver notas)</label>
+        <!-- MACROSTOMIA -->
+        <div class="grid-2" style="margin-top:14px">
+          <div class="field-stacked">
+            <label>¿Macrostomía?</label>
+            <select id="macro_yn">
+              <option value="">—</option>
+              <option value="17160">Sí</option>
+              <option value="17162">No</option>
+            </select>
           </div>
-          <textarea id="surg_notes" placeholder="Fechas, técnicas, complicaciones..." style="margin-top:10px; width:100%; min-height:50px; border:1px solid var(--line); padding:8px; font-family:inherit; font-size:13px; background:var(--bg);"></textarea>
+        </div>
+        <div class="conditional" id="macro_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Lado macrostomía</label>
+              <select id="macro_side">
+                <option value="">—</option>
+                <option value="17076">Izquierdo</option>
+                <option value="17078">Derecho</option>
+                <option value="17080">Bilateral</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Diagnóstico final macrostomía</label>
+              <input type="text" id="macro_final" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Paladar</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>Tipo de diagnóstico</label>
+            <select id="pal_type">
+              <option value="">—</option>
+              <option value="17224">Unilateral</option>
+              <option value="17226">Bilateral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="conditional" id="pal_unilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Lado</label>
+              <select id="pal_uni_side">
+                <option value="">—</option>
+                <option value="17232">Derecho</option>
+                <option value="17234">Izquierdo</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción unilateral</label>
+              <select id="pal_uni_desc">
+                <option value="">—</option>
+                <option value="17236">Completo</option>
+                <option value="17238">Posterior</option>
+                <option value="17240">Submucoso</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final paladar unilateral</label>
+            <textarea id="pal_uni_final" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="conditional" id="pal_bilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Descripción lado derecho</label>
+              <select id="pal_bi_right">
+                <option value="">—</option>
+                <option value="17114">Completo</option>
+                <option value="17116">Posterior</option>
+                <option value="17118">Submucoso</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción lado izquierdo</label>
+              <select id="pal_bi_left">
+                <option value="">—</option>
+                <option value="17120">Completo</option>
+                <option value="17122">Posterior</option>
+                <option value="17124">Submucoso</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final paladar bilateral</label>
+            <textarea id="pal_bi_final" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Reborde alveolar</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>Tipo de diagnóstico</label>
+            <select id="alv_type">
+              <option value="">—</option>
+              <option value="17192">Unilateral</option>
+              <option value="17194">Bilateral</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="conditional" id="alv_unilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Lado</label>
+              <select id="alv_uni_side">
+                <option value="">—</option>
+                <option value="17196">Derecho</option>
+                <option value="17198">Izquierdo</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción unilateral</label>
+              <select id="alv_uni_desc">
+                <option value="">—</option>
+                <option value="17200">Completo</option>
+                <option value="17202">Incompleto</option>
+                <option value="17204">Frustro</option>
+                <option value="17206">Reparado</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final reborde alveolar unilateral</label>
+            <textarea id="alv_uni_final" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="conditional" id="alv_bilateral_block">
+          <div class="grid-2">
+            <div class="field-stacked">
+              <label>Descripción lado derecho</label>
+              <select id="alv_bi_right">
+                <option value="">—</option>
+                <option value="17216">Completo</option>
+                <option value="17218">Incompleto</option>
+                <option value="17220">Frustro</option>
+                <option value="17222">Reparado</option>
+              </select>
+            </div>
+            <div class="field-stacked">
+              <label>Descripción lado izquierdo</label>
+              <select id="alv_bi_left">
+                <option value="">—</option>
+                <option value="17208">Completo</option>
+                <option value="17210">Incompleto</option>
+                <option value="17212">Frustro</option>
+                <option value="17214">Reparado</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-stacked" style="margin-top:12px">
+            <label>Diagnóstico final reborde alveolar bilateral</label>
+            <textarea id="alv_bi_final" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Nariz</h3></div>
+      <div class="section-body">
+        <div class="field-stacked">
+          <label>Diagnóstico de nariz (multi-selección)</label>
+          <div class="chips" id="nose_diag" data-multi="true">
+            <span class="chip" data-id="16178">Deformación nasal unilateral izquierda</span>
+            <span class="chip" data-id="16180">Deformación nasal unilateral derecha</span>
+            <span class="chip" data-id="16182">Deformación nasal bilateral</span>
+            <span class="chip" data-id="16184">Deficiencia de Columella</span>
+            <span class="chip" data-id="16186">Desviación septal</span>
+            <span class="chip" data-id="16188">Otro</span>
+          </div>
+        </div>
+        <div class="field-stacked" style="margin-top:14px">
+          <label>Otro tipo de diagnóstico de nariz</label>
+          <input type="text" id="nose_other" placeholder="Si seleccionó 'Otro' arriba" />
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- FINDINGS PANEL -->
+  <!-- ============ SURGERY ============ -->
+  <div class="panel" id="panel-surgery">
+
+    <!-- LABIO -->
+    <div class="section">
+      <div class="section-head"><h3>Cirugía de labio</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>¿Operación de labio realizada?</label>
+            <select id="op_lip_yn">
+              <option value="">—</option>
+              <option value="15806">Sí</option>
+              <option value="15808">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="op_lip_block">
+          <p style="font-size:12px;color:var(--ink-3);margin-bottom:8px">Una fila por cirugía. Agregar fila si hubo más de una.</p>
+          <div class="surgery-list" id="op_lip_list"></div>
+          <button type="button" class="surgery-add" data-target="op_lip_list">+ Agregar cirugía de labio</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PALADAR -->
+    <div class="section">
+      <div class="section-head"><h3>Cirugía de paladar</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>¿Operación de paladar realizada?</label>
+            <select id="op_pal_yn">
+              <option value="">—</option>
+              <option value="15810">Sí</option>
+              <option value="15812">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="op_pal_block">
+          <div class="surgery-list" id="op_pal_list"></div>
+          <button type="button" class="surgery-add" data-target="op_pal_list">+ Agregar cirugía de paladar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FISTULA -->
+    <div class="section">
+      <div class="section-head"><h3>Cirugía de fístula</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>¿Operación de fístula realizada?</label>
+            <select id="op_fis_yn">
+              <option value="">—</option>
+              <option value="15814">Sí</option>
+              <option value="15816">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="op_fis_block">
+          <div class="surgery-list" id="op_fis_list"></div>
+          <button type="button" class="surgery-add" data-target="op_fis_list">+ Agregar cirugía de fístula</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INJERTO -->
+    <div class="section">
+      <div class="section-head"><h3>Cirugía de injerto óseo</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>¿Operación de injerto óseo realizada?</label>
+            <select id="op_inj_yn">
+              <option value="">—</option>
+              <option value="15818">Sí</option>
+              <option value="15820">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="op_inj_block">
+          <div class="surgery-list" id="op_inj_list"></div>
+          <button type="button" class="surgery-add" data-target="op_inj_list">+ Agregar cirugía de injerto óseo</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ FINDINGS ============ -->
   <div class="panel" id="panel-findings">
-    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin-bottom:14px;">Hallazgos extraorales</h3>
-    <div class="findings">
-      <div class="finding-card"><h4>Cabeza</h4><textarea data-finding="cabeza"></textarea></div>
-      <div class="finding-card"><h4>Cara</h4><textarea data-finding="cara"></textarea></div>
-      <div class="finding-card"><h4>Ojos</h4><textarea data-finding="ojos"></textarea></div>
-      <div class="finding-card"><h4>Orejas</h4><textarea data-finding="orejas"></textarea></div>
-      <div class="finding-card"><h4>Cuello</h4><textarea data-finding="cuello"></textarea></div>
-      <div class="finding-card"><h4>ATM</h4><textarea data-finding="atm"></textarea></div>
-      <div class="finding-card"><h4>Manos</h4><textarea data-finding="manos"></textarea></div>
-      <div class="finding-card"><h4>Pies</h4><textarea data-finding="pies"></textarea></div>
-    </div>
 
-    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:28px 0 14px;">Hallazgos intraorales</h3>
-    <div class="findings">
-      <div class="finding-card"><h4>Filtrum</h4><textarea data-finding="filtrum"></textarea></div>
-      <div class="finding-card"><h4>Lengua</h4><textarea data-finding="lengua"></textarea></div>
-      <div class="finding-card"><h4>Mucosa de carrillos</h4><textarea data-finding="mucosa_carrillos"></textarea></div>
-      <div class="finding-card"><h4>Mucosa de labios</h4><textarea data-finding="mucosa_labios"></textarea></div>
-    </div>
-
-    <h3 style="font-family:'Fraunces',serif;font-size:18px;margin:28px 0 14px;">Factores de riesgo cariogénico</h3>
-    <div class="risk-row">
-      <div class="field">
-        <label>¿Sangrado de encías?</label>
-        <select id="risk_bleeding">
-          <option value="">—</option>
-          <option value="never">Nunca</option>
-          <option value="occasional">Ocasional</option>
-          <option value="frequent">Frecuente</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>¿Consumo de azúcar?</label>
-        <select id="risk_sugar">
-          <option value="">—</option>
-          <option value="low">Bajo</option>
-          <option value="moderate">Moderado</option>
-          <option value="high">Alto</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Tipo de azúcar predominante</label>
-        <select id="risk_sugar_type">
-          <option value="">—</option>
-          <option value="natural">Natural (frutas)</option>
-          <option value="processed">Procesado</option>
-          <option value="beverages">Bebidas azucaradas</option>
-          <option value="mixed">Mixto</option>
-        </select>
+    <div class="section">
+      <div class="section-head"><h3>Hallazgos extraorales</h3></div>
+      <div class="section-body grid-2">
+        <div class="field boxed"><label>Cabeza</label><textarea data-finding="cabeza"></textarea></div>
+        <div class="field boxed"><label>Cara</label><textarea data-finding="cara"></textarea></div>
+        <div class="field boxed"><label>Ojos</label><textarea data-finding="ojos"></textarea></div>
+        <div class="field boxed"><label>Orejas</label><textarea data-finding="orejas"></textarea></div>
+        <div class="field boxed"><label>Cuello</label><textarea data-finding="cuello"></textarea></div>
+        <div class="field boxed"><label>ATM</label><textarea data-finding="atm"></textarea></div>
+        <div class="field boxed"><label>Manos</label><textarea data-finding="manos"></textarea></div>
+        <div class="field boxed"><label>Pies</label><textarea data-finding="pies"></textarea></div>
       </div>
     </div>
 
-    <div class="finding-card" style="margin-top:24px;">
-      <h4>Razón complicaciones dentales / Descartar síndrome / Referencia</h4>
-      <textarea data-finding="general_notes" style="min-height:90px;"></textarea>
+    <div class="section">
+      <div class="section-head"><h3>Hallazgos intraorales</h3></div>
+      <div class="section-body grid-2">
+        <div class="field boxed"><label>Filtrum</label><textarea data-finding="filtrum"></textarea></div>
+        <div class="field boxed"><label>Lengua</label><textarea data-finding="lengua"></textarea></div>
+        <div class="field boxed"><label>Mucosa de los carrillos</label><textarea data-finding="mucosa_carrillos"></textarea></div>
+        <div class="field boxed"><label>Mucosa de los labios</label><textarea data-finding="mucosa_labios"></textarea></div>
+        <div class="field boxed"><label>Reborde alveolar</label><textarea data-finding="reborde"></textarea></div>
+        <div class="field boxed"><label>Istmo de las fauces</label><textarea data-finding="istmo"></textarea></div>
+        <div class="field boxed" style="grid-column: span 2"><label>Otro tipo de hallazgo intraoral</label><textarea data-finding="otro_intraoral"></textarea></div>
+      </div>
     </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Otros</h3></div>
+      <div class="section-body grid-2">
+        <div class="field boxed"><label>Descartar síndrome</label><textarea data-finding="sindrome"></textarea></div>
+        <div class="field boxed"><label>Referencia</label><textarea data-finding="referencia"></textarea></div>
+        <div class="field boxed" style="grid-column: span 2"><label>Otros comentarios / observaciones generales</label><textarea data-finding="general_notes" rows="3"></textarea></div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- EXPORT BAR -->
-  <div class="export-bar">
-    <h3>Salida de datos</h3>
-    <div class="actions">
-      <button class="btn" id="btnViewJson">Ver JSON</button>
-      <button class="btn" id="btnCopyJson">Copiar JSON</button>
-      <button class="btn primary" id="btnSimulate">Guardar en Bitrix</button>
-      <button class="btn-danger btn" id="btnReset">Reset</button>
+  <!-- ============ HABITS & RISK ============ -->
+  <div class="panel" id="panel-risk">
+    <div class="section">
+      <div class="section-head"><h3>Hábitos de higiene</h3></div>
+      <div class="section-body grid-3">
+        <div class="field-stacked">
+          <label>¿Le cepilla los dientes al menos una vez al día?</label>
+          <select id="brush_yn">
+            <option value="">—</option>
+            <option value="15836">Sí</option>
+            <option value="15838">No</option>
+            <option value="15840">No aplica</option>
+          </select>
+        </div>
+        <div class="field-stacked">
+          <label>¿Utiliza pasta dental con flúor?</label>
+          <select id="fluor_yn">
+            <option value="">—</option>
+            <option value="">Sí</option>
+            <option value="">No</option>
+            <option value="">No aplica</option>
+          </select>
+        </div>
+        <div class="field-stacked">
+          <label>¿Le sangran las encías frecuentemente?</label>
+          <select id="bleeding">
+            <option value="">—</option>
+            <option value="15852">Sí</option>
+            <option value="15854">No</option>
+            <option value="15856">No aplica</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Riesgo cariogénico</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>¿Consume azúcar regularmente?</label>
+            <select id="sugar_yn">
+              <option value="">—</option>
+              <option value="15858">Sí</option>
+              <option value="15860">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="sugar_block">
+          <div class="field-stacked">
+            <label>Tipo de azúcar (multi-selección)</label>
+            <div class="chips" id="sugar_types" data-multi="true">
+              <span class="chip" data-id="15862">Bebidas endulzadas</span>
+              <span class="chip" data-id="15864">Jugos</span>
+              <span class="chip" data-id="15866">Dulces</span>
+              <span class="chip" data-id="15868">Galletas</span>
+              <span class="chip" data-id="15870">Chucherías</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><h3>Antecedentes y alergias</h3></div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="field-stacked">
+            <label>Ortopedia prequirúrgica previa</label>
+            <select id="ortho_pre">
+              <option value="">—</option>
+              <option value="15822">Sí</option>
+              <option value="15824">No</option>
+              <option value="15826">No aplica</option>
+            </select>
+          </div>
+          <div class="field-stacked">
+            <label>¿Complicaciones dentales previas?</label>
+            <select id="prev_compl_yn">
+              <option value="">—</option>
+              <option value="">Sí</option>
+              <option value="">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="field boxed" style="margin-top:14px">
+          <label>Razón complicaciones dentales</label>
+          <textarea id="compl_reason" rows="2"></textarea>
+        </div>
+
+        <div class="grid-2" style="margin-top:14px">
+          <div class="field-stacked">
+            <label>¿El paciente es alérgico?</label>
+            <select id="allergy_yn">
+              <option value="">—</option>
+              <option value="">Sí</option>
+              <option value="">No</option>
+            </select>
+          </div>
+        </div>
+        <div class="conditional" id="allergy_block">
+          <div class="field boxed">
+            <label>Detalle de otras alergias</label>
+            <textarea id="allergy_detail" rows="2"></textarea>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -969,6 +1364,19 @@
   </div>
 </div>
 
+<!-- ============ FIXED SAVE BAR ============ -->
+<div class="save-bar">
+  <div class="info" id="saveBarInfo">
+    Listo · <strong>0</strong> dientes con datos
+  </div>
+  <div class="actions">
+    <button class="btn" id="btnViewJson">Ver JSON</button>
+    <button class="btn" id="btnCopyJson">Copiar JSON</button>
+    <button class="btn primary" id="btnSave">Guardar en Bitrix</button>
+    <button class="btn-danger btn" id="btnReset">Reset</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -992,20 +1400,29 @@ const FDI_DECIDUOUS = {
   lowerLeft:  [71, 72, 73, 74, 75]
 };
 
+// Mapping FDI → ID de item de la lista Permanentes/Deciduos en Bitrix
+const FDI_TO_PERMANENT_ID = {
+  18: 15912, 17: 15914, 16: 15916, 15: 15918, 14: 15920, 13: 15922, 12: 15924, 11: 15926,
+  21: 15928, 22: 15930, 23: 15932, 24: 15934, 25: 15936, 26: 15938, 27: 15940, 28: 15942,
+  38: 15944, 37: 15946, 36: 15948, 35: 15950, 34: 15952, 33: 15954, 32: 15956, 31: 15958,
+  41: 15960, 42: 15962, 43: 15964, 44: 15966, 45: 15968, 46: 15970, 47: 15972, 48: 15974
+};
+const FDI_TO_DECIDUOUS_ID = {
+  55: 15872, 54: 15874, 53: 15876, 52: 15878, 51: 15880,
+  61: 15882, 62: 15884, 63: 15886, 64: 15888, 65: 15890,
+  75: 15892, 74: 15894, 73: 15896, 72: 15898, 71: 15900,
+  81: 15902, 82: 15904, 83: 15906, 84: 15908, 85: 15910
+};
+
 const CONDITION_COLORS = {
-  sano: 'var(--c-sano)',
-  caries: 'var(--c-caries)',
-  obturado: 'var(--c-obturado)',
-  corona_total: 'var(--c-corona)',
-  endodoncia: 'var(--c-endodoncia)',
-  extraccion_indicada: 'var(--c-extraccion)',
-  ausente_clinica: 'var(--c-ausente)',
-  ausente_congenita: 'var(--c-agenesia)',
-  implante: 'var(--c-implante)',
-  fractura: 'var(--c-fractura)',
-  sellante: 'var(--c-sellante)',
-  protesis_fija: 'var(--c-protesis)',
-  supernumerario: 'var(--c-supernumerario)'
+  sano: 'var(--c-sano)', caries: 'var(--c-caries)', obturado: 'var(--c-obturado)',
+  corona_total: 'var(--c-corona)', endodoncia: 'var(--c-endodoncia)',
+  extraccion_indicada: 'var(--c-extraccion)', ausente_clinica: 'var(--c-ausente)',
+  ausente_congenita: 'var(--c-agenesia)', implante: 'var(--c-implante)',
+  fractura: 'var(--c-fractura)', sellante: 'var(--c-sellante)',
+  protesis_fija: 'var(--c-protesis)', supernumerario: 'var(--c-supernumerario)',
+  erupcion: 'var(--c-erupcion)', impactado: 'var(--c-impactado)',
+  movilidad: 'var(--c-movilidad)'
 };
 
 const LEGEND_ITEMS = [
@@ -1015,25 +1432,26 @@ const LEGEND_ITEMS = [
   { label: 'Corona', color: 'var(--c-corona)' },
   { label: 'Endodoncia', color: 'var(--c-endodoncia)' },
   { label: 'Sellante', color: 'var(--c-sellante)' },
-  { label: 'Ausente', color: 'var(--c-ausente)' },
-  { label: 'Implante', color: 'var(--c-implante)' }
+  { label: 'Ausente', color: 'var(--c-ausente)' }
 ];
 
 // ============================================================
 // STATE
 // ============================================================
 const state = {
-  patient: { id: '', name: '', exam_date: '', practitioner: '' },
-  dentition_mode: 'permanent', // permanent | mixed | deciduous
-  teeth: {}, // { "55": { faces: {O,M,D,V,L}, whole: null, notes: '' } }
-  cleft: {
-    type: 'none',
-    extent: null,
-    structures: [],
-    surgeries: { queilo: false, palato: false, injerto: false, rinoplastia: false, otra: false, notes: '' }
+  patient: { id: '', volunteer_id: '', exam_date: '', form_type: '', modality: '' },
+  dentition_mode: 'permanent',
+  teeth: {},
+  cleft: {},
+  surgery: {
+    op_lip_yn: '', op_lip_items: [],
+    op_pal_yn: '', op_pal_items: [],
+    op_fis_yn: '', op_fis_items: [],
+    op_inj_yn: '', op_inj_items: []
   },
   findings: {},
-  risk: { bleeding: '', sugar: '', sugar_type: '' }
+  risk: {},
+  nose: { selected: [], other: '' }
 };
 
 let currentTooth = null;
@@ -1043,10 +1461,12 @@ let currentTooth = null;
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('examDate').valueAsDate = new Date();
+  state.patient.exam_date = document.getElementById('examDate').value;
   document.getElementById('dateLabel').textContent = new Date().toLocaleDateString('es-GT', { year: 'numeric', month: 'long', day: 'numeric' });
   buildLegend();
   renderArches();
   bindEvents();
+  updateSaveBarCounter();
 });
 
 function buildLegend() {
@@ -1057,57 +1477,28 @@ function buildLegend() {
 }
 
 // ============================================================
-// TOOTH SVG
+// TOOTH SVG / RENDER
 // ============================================================
 function toothSVG(fdi, isDeciduous) {
-  // 5 faces layout: top=Vestibular, bottom=Lingual, left=Mesial (upper-right) or Distal,
-  // right=Distal or Mesial, center=Oclusal
-  // For simplicity we orient: Top=V, Bottom=L, center=O, and L/R sides = M/D depending on quadrant
-  // Determine if M is on left or right based on quadrant
   const q = Math.floor(fdi / 10);
-  // Cuadrants 1, 4 (right side of patient) → mesial is on the right of the SVG (toward midline)
-  // Cuadrants 2, 3 (left side of patient) → mesial is on the left of the SVG (toward midline)
   const mesialOnRight = (q === 1 || q === 4 || q === 5 || q === 8);
-
   const w = isDeciduous ? 32 : 38;
   const h = isDeciduous ? 40 : 48;
-
-  // 5-face square diagram
-  // Outer square 30x30 centered; faces are trapezoids meeting at center
-  const cx = w / 2;
-  const top = 4;
-  const bottom = h - 4;
-  const left = isDeciduous ? 4 : 4;
-  const right = w - 4;
+  const top = 4, bottom = h - 4, left = 4, right = w - 4;
   const innerTop = top + (bottom - top) * 0.3;
   const innerBottom = bottom - (bottom - top) * 0.3;
   const innerLeft = left + (right - left) * 0.3;
   const innerRight = right - (right - left) * 0.3;
-
-  // Vestibular = top, Lingual = bottom, Oclusal = center
-  // Mesial / Distal on sides depending on mesialOnRight
   const leftFace = mesialOnRight ? 'D' : 'M';
   const rightFace = mesialOnRight ? 'M' : 'D';
 
   return `
     <svg class="tooth-svg ${isDeciduous ? 'deciduous' : ''}" viewBox="0 0 ${w} ${h}" data-fdi="${fdi}">
-      <!-- Vestibular (top) -->
-      <polygon class="face" data-face="V" data-fdi="${fdi}"
-        points="${left},${top} ${right},${top} ${innerRight},${innerTop} ${innerLeft},${innerTop}"/>
-      <!-- Lingual (bottom) -->
-      <polygon class="face" data-face="L" data-fdi="${fdi}"
-        points="${innerLeft},${innerBottom} ${innerRight},${innerBottom} ${right},${bottom} ${left},${bottom}"/>
-      <!-- Left side -->
-      <polygon class="face" data-face="${leftFace}" data-fdi="${fdi}"
-        points="${left},${top} ${innerLeft},${innerTop} ${innerLeft},${innerBottom} ${left},${bottom}"/>
-      <!-- Right side -->
-      <polygon class="face" data-face="${rightFace}" data-fdi="${fdi}"
-        points="${innerRight},${innerTop} ${right},${top} ${right},${bottom} ${innerRight},${innerBottom}"/>
-      <!-- Oclusal (center) -->
-      <rect class="face" data-face="O" data-fdi="${fdi}"
-        x="${innerLeft}" y="${innerTop}"
-        width="${innerRight - innerLeft}" height="${innerBottom - innerTop}"/>
-      <!-- Outline -->
+      <polygon class="face" data-face="V" data-fdi="${fdi}" points="${left},${top} ${right},${top} ${innerRight},${innerTop} ${innerLeft},${innerTop}"/>
+      <polygon class="face" data-face="L" data-fdi="${fdi}" points="${innerLeft},${innerBottom} ${innerRight},${innerBottom} ${right},${bottom} ${left},${bottom}"/>
+      <polygon class="face" data-face="${leftFace}" data-fdi="${fdi}" points="${left},${top} ${innerLeft},${innerTop} ${innerLeft},${innerBottom} ${left},${bottom}"/>
+      <polygon class="face" data-face="${rightFace}" data-fdi="${fdi}" points="${innerRight},${innerTop} ${right},${top} ${right},${bottom} ${innerRight},${innerBottom}"/>
+      <rect class="face" data-face="O" data-fdi="${fdi}" x="${innerLeft}" y="${innerTop}" width="${innerRight - innerLeft}" height="${innerBottom - innerTop}"/>
       <rect class="tooth-outline" x="${left}" y="${top}" width="${right-left}" height="${bottom-top}"/>
     </svg>
   `;
@@ -1116,21 +1507,16 @@ function toothSVG(fdi, isDeciduous) {
 function renderArches() {
   const upper = document.getElementById('archUpper');
   const lower = document.getElementById('archLower');
-
   const mode = state.dentition_mode;
   let upperRight, upperLeft, lowerRight, lowerLeft;
 
   if (mode === 'permanent') {
-    upperRight = FDI_PERMANENT.upperRight;
-    upperLeft  = FDI_PERMANENT.upperLeft;
-    lowerRight = FDI_PERMANENT.lowerRight;
-    lowerLeft  = FDI_PERMANENT.lowerLeft;
+    upperRight = FDI_PERMANENT.upperRight; upperLeft = FDI_PERMANENT.upperLeft;
+    lowerRight = FDI_PERMANENT.lowerRight; lowerLeft = FDI_PERMANENT.lowerLeft;
   } else if (mode === 'deciduous') {
-    upperRight = FDI_DECIDUOUS.upperRight;
-    upperLeft  = FDI_DECIDUOUS.upperLeft;
-    lowerRight = FDI_DECIDUOUS.lowerRight;
-    lowerLeft  = FDI_DECIDUOUS.lowerLeft;
-  } else { // mixed
+    upperRight = FDI_DECIDUOUS.upperRight; upperLeft = FDI_DECIDUOUS.upperLeft;
+    lowerRight = FDI_DECIDUOUS.lowerRight; lowerLeft = FDI_DECIDUOUS.lowerLeft;
+  } else {
     upperRight = [...FDI_PERMANENT.upperRight.slice(0, 3), ...FDI_DECIDUOUS.upperRight];
     upperLeft  = [...FDI_DECIDUOUS.upperLeft, ...FDI_PERMANENT.upperLeft.slice(5)];
     lowerRight = [...FDI_PERMANENT.lowerRight.slice(0, 3), ...FDI_DECIDUOUS.lowerRight];
@@ -1146,7 +1532,6 @@ function renderArches() {
     <div class="arch-half right">${lowerLeft.map(t => toothBlock(t, isDecid(t))).join('')}</div>
   `;
 
-  // Apply existing state visuals
   Object.keys(state.teeth).forEach(fdi => applyToothVisuals(fdi));
 }
 
@@ -1170,10 +1555,7 @@ function applyToothVisuals(fdi) {
   if (!tooth) return;
   const toothEl = document.querySelector(`.tooth[data-fdi="${fdi}"]`);
   if (!toothEl) return;
-
   toothEl.classList.toggle('has-data', true);
-
-  // If whole-tooth state set, override face colors
   if (tooth.whole) {
     const color = CONDITION_COLORS[tooth.whole] || 'var(--c-ausente)';
     toothEl.querySelectorAll('.face').forEach(f => f.style.fill = color);
@@ -1215,19 +1597,13 @@ function bindEvents() {
     });
   });
 
-  // Tooth click - delegate
+  // Tooth click (delegate)
   document.addEventListener('click', e => {
     const face = e.target.closest('.face');
     const toothNum = e.target.closest('.tooth-num');
     const tooth = e.target.closest('.tooth');
-
-    if (face) {
-      const fdi = face.dataset.fdi;
-      openToothModal(fdi);
-    } else if (toothNum && tooth) {
-      const fdi = tooth.dataset.fdi;
-      openToothModal(fdi);
-    }
+    if (face) openToothModal(face.dataset.fdi);
+    else if (toothNum && tooth) openToothModal(tooth.dataset.fdi);
   });
 
   // Modal
@@ -1238,39 +1614,45 @@ function bindEvents() {
   document.getElementById('modalSave').addEventListener('click', saveModal);
   document.getElementById('modalClear').addEventListener('click', clearTooth);
 
-  // Patient fields
+  // Patient
   document.getElementById('patientId').addEventListener('input', e => state.patient.id = e.target.value);
-  document.getElementById('patientName').addEventListener('input', e => state.patient.name = e.target.value);
+  document.getElementById('volunteerId').addEventListener('input', e => state.patient.volunteer_id = e.target.value);
   document.getElementById('examDate').addEventListener('change', e => state.patient.exam_date = e.target.value);
-  document.getElementById('practitioner').addEventListener('input', e => state.patient.practitioner = e.target.value);
+  document.getElementById('formType').addEventListener('change', e => state.patient.form_type = e.target.value);
+  document.getElementById('modality').addEventListener('change', e => state.patient.modality = e.target.value);
 
-  // Cleft
-  document.querySelectorAll('input[name="cleft_type"]').forEach(r => {
-    r.addEventListener('change', e => state.cleft.type = e.target.value);
-  });
-  document.querySelectorAll('input[name="cleft_extent"]').forEach(r => {
-    r.addEventListener('change', e => state.cleft.extent = e.target.value);
-  });
-  document.querySelectorAll('.cleft-struct').forEach(c => {
-    c.addEventListener('change', () => syncCleftStructures());
-  });
-  document.querySelectorAll('.cleft-region').forEach(r => {
-    r.addEventListener('click', () => {
-      const region = r.dataset.region;
-      const cb = document.querySelector(`.cleft-struct[data-region="${region}"]`);
-      if (cb) {
-        cb.checked = !cb.checked;
-        syncCleftStructures();
-      }
+  // Cleft - Labio
+  bindConditional('lip_type', { '17156': 'lip_unilateral_block', '17158': 'lip_bilateral_block' }, 'cleft.lip_type');
+  bindConditional('macro_yn', { '17160': 'macro_block' }, 'cleft.macro_yn');
+  ['lip_uni_side','lip_uni_desc','lip_uni_final','lip_bi_right','lip_bi_left','lip_bi_final',
+   'macro_side','macro_final'].forEach(id => bindToState(id, 'cleft.' + id));
+
+  // Cleft - Paladar
+  bindConditional('pal_type', { '17224': 'pal_unilateral_block', '17226': 'pal_bilateral_block' }, 'cleft.pal_type');
+  ['pal_uni_side','pal_uni_desc','pal_uni_final','pal_bi_right','pal_bi_left','pal_bi_final'].forEach(id => bindToState(id, 'cleft.' + id));
+
+  // Cleft - Reborde
+  bindConditional('alv_type', { '17192': 'alv_unilateral_block', '17194': 'alv_bilateral_block' }, 'cleft.alv_type');
+  ['alv_uni_side','alv_uni_desc','alv_uni_final','alv_bi_right','alv_bi_left','alv_bi_final'].forEach(id => bindToState(id, 'cleft.' + id));
+
+  // Nose chips (multi)
+  document.querySelectorAll('#nose_diag .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('active');
+      state.nose.selected = Array.from(document.querySelectorAll('#nose_diag .chip.active')).map(c => c.dataset.id);
     });
   });
+  bindToState('nose_other', 'nose.other');
 
-  ['queilo','palato','injerto','rinoplastia','otra'].forEach(s => {
-    document.getElementById('surg_' + s).addEventListener('change', e => {
-      state.cleft.surgeries[s] = e.target.checked;
-    });
+  // Surgeries
+  bindConditional('op_lip_yn', { '15806': 'op_lip_block' }, 'surgery.op_lip_yn');
+  bindConditional('op_pal_yn', { '15810': 'op_pal_block' }, 'surgery.op_pal_yn');
+  bindConditional('op_fis_yn', { '15814': 'op_fis_block' }, 'surgery.op_fis_yn');
+  bindConditional('op_inj_yn', { '15818': 'op_inj_block' }, 'surgery.op_inj_yn');
+
+  document.querySelectorAll('.surgery-add').forEach(btn => {
+    btn.addEventListener('click', () => addSurgeryRow(btn.dataset.target));
   });
-  document.getElementById('surg_notes').addEventListener('input', e => state.cleft.surgeries.notes = e.target.value);
 
   // Findings
   document.querySelectorAll('[data-finding]').forEach(t => {
@@ -1278,22 +1660,116 @@ function bindEvents() {
   });
 
   // Risk
-  document.getElementById('risk_bleeding').addEventListener('change', e => state.risk.bleeding = e.target.value);
-  document.getElementById('risk_sugar').addEventListener('change', e => state.risk.sugar = e.target.value);
-  document.getElementById('risk_sugar_type').addEventListener('change', e => state.risk.sugar_type = e.target.value);
+  ['brush_yn','fluor_yn','bleeding','sugar_yn','ortho_pre','prev_compl_yn','allergy_yn','compl_reason','allergy_detail'].forEach(id => {
+    bindToState(id, 'risk.' + id);
+  });
+  bindConditional('sugar_yn', { '15858': 'sugar_block' }, 'risk.sugar_yn');
+  bindConditional('allergy_yn', {}, 'risk.allergy_yn'); // bound but no specific reveal mapping (always show on Sí)
+  document.getElementById('allergy_yn').addEventListener('change', e => {
+    document.getElementById('allergy_block').classList.toggle('show', e.target.value !== '' && e.target.options[e.target.selectedIndex].text === 'Sí');
+  });
 
-  // Export
+  // Sugar chips
+  document.querySelectorAll('#sugar_types .chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('active');
+      state.risk.sugar_types = Array.from(document.querySelectorAll('#sugar_types .chip.active')).map(c => c.dataset.id);
+    });
+  });
+
+  // Footer buttons
   document.getElementById('btnViewJson').addEventListener('click', toggleJson);
   document.getElementById('btnCopyJson').addEventListener('click', copyJson);
-  document.getElementById('btnSimulate').addEventListener('click', simulateSend);
+  document.getElementById('btnSave').addEventListener('click', saveToBitrix);
   document.getElementById('btnReset').addEventListener('click', resetAll);
 }
 
-function syncCleftStructures() {
-  state.cleft.structures = Array.from(document.querySelectorAll('.cleft-struct:checked')).map(c => c.dataset.region);
-  document.querySelectorAll('.cleft-region').forEach(r => {
-    r.classList.toggle('affected', state.cleft.structures.includes(r.dataset.region));
+function bindToState(elementId, statePath) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.addEventListener(el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' ? 'input' : 'change', e => {
+    setStateByPath(statePath, e.target.value);
   });
+}
+
+function bindConditional(elementId, valueToBlockMap, statePath) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  el.addEventListener('change', e => {
+    setStateByPath(statePath, e.target.value);
+    // Hide all related blocks
+    Object.values(valueToBlockMap).forEach(blockId => {
+      const b = document.getElementById(blockId);
+      if (b) b.classList.remove('show');
+    });
+    // Show the matching one
+    const targetId = valueToBlockMap[e.target.value];
+    if (targetId) {
+      const b = document.getElementById(targetId);
+      if (b) b.classList.add('show');
+    }
+  });
+}
+
+function setStateByPath(path, value) {
+  const parts = path.split('.');
+  let obj = state;
+  for (let i = 0; i < parts.length - 1; i++) {
+    if (!obj[parts[i]]) obj[parts[i]] = {};
+    obj = obj[parts[i]];
+  }
+  obj[parts[parts.length - 1]] = value;
+}
+
+// ============================================================
+// SURGERY ROWS
+// ============================================================
+let surgeryRowSeq = 0;
+function addSurgeryRow(listId) {
+  const list = document.getElementById(listId);
+  const rowId = `surg_${surgeryRowSeq++}`;
+  const row = document.createElement('div');
+  row.className = 'surgery-row';
+  row.dataset.rowId = rowId;
+  row.innerHTML = `
+    <div class="field-stacked">
+      <label style="font-size:10px;font-family:'JetBrains Mono', monospace;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3)">Edad</label>
+      <input type="text" class="surg-age" placeholder="Ej: 6 meses, 2 años" />
+    </div>
+    <div class="field-stacked">
+      <label style="font-size:10px;font-family:'JetBrains Mono', monospace;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3)">Fecha</label>
+      <input type="date" class="surg-date" />
+    </div>
+    <div class="field-stacked">
+      <label style="font-size:10px;font-family:'JetBrains Mono', monospace;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-3)">Lugar</label>
+      <input type="text" class="surg-place" placeholder="Hospital / clínica" />
+    </div>
+    <button type="button" class="surgery-remove" title="Eliminar">×</button>
+  `;
+  list.appendChild(row);
+
+  row.querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => collectSurgery(listId));
+  });
+  row.querySelector('.surgery-remove').addEventListener('click', () => {
+    row.remove();
+    collectSurgery(listId);
+  });
+  collectSurgery(listId);
+}
+
+function collectSurgery(listId) {
+  const items = [];
+  document.querySelectorAll(`#${listId} .surgery-row`).forEach(row => {
+    items.push({
+      age: row.querySelector('.surg-age').value || '',
+      date: row.querySelector('.surg-date').value || '',
+      place: row.querySelector('.surg-place').value || ''
+    });
+  });
+  // Map to state key
+  const stateKey = listId.replace('_list', '_items');
+  state.surgery[stateKey] = items;
 }
 
 // ============================================================
@@ -1302,19 +1778,16 @@ function syncCleftStructures() {
 function openToothModal(fdi) {
   currentTooth = fdi;
   const tooth = state.teeth[fdi] || { faces: {}, whole: null, notes: '' };
-
   document.getElementById('modalTitle').textContent = `Diente ${fdi}`;
-  const isDecid = (Math.floor(fdi/10) >= 5);
+  const decid = isDecid(fdi);
   document.getElementById('modalToothId').textContent =
-    `FDI: ${fdi} · ${isDecid ? 'Temporal' : 'Permanente'} · ${getToothName(fdi)}`;
-
+    `FDI: ${fdi} · ${decid ? 'Temporal' : 'Permanente'} · ${getToothName(fdi)}`;
   document.getElementById('wholeToothState').value = tooth.whole || '';
   document.querySelectorAll('#faceSelector select').forEach(sel => {
     const face = sel.dataset.face;
     sel.value = (tooth.faces && tooth.faces[face]) || 'sano';
   });
   document.getElementById('toothNotes').value = tooth.notes || '';
-
   document.getElementById('toothModal').classList.add('open');
 }
 
@@ -1327,12 +1800,8 @@ function saveModal() {
   if (!currentTooth) return;
   const whole = document.getElementById('wholeToothState').value || null;
   const faces = {};
-  document.querySelectorAll('#faceSelector select').forEach(sel => {
-    faces[sel.dataset.face] = sel.value;
-  });
+  document.querySelectorAll('#faceSelector select').forEach(sel => faces[sel.dataset.face] = sel.value);
   const notes = document.getElementById('toothNotes').value;
-
-  // Only save if there's something meaningful
   const hasFaceData = Object.values(faces).some(v => v !== 'sano');
   if (whole || hasFaceData || notes) {
     state.teeth[currentTooth] = { whole, faces, notes };
@@ -1340,6 +1809,7 @@ function saveModal() {
     delete state.teeth[currentTooth];
   }
   renderArches();
+  updateSaveBarCounter();
   closeModal();
   showToast(`Diente ${currentTooth} guardado`);
 }
@@ -1348,53 +1818,58 @@ function clearTooth() {
   if (!currentTooth) return;
   delete state.teeth[currentTooth];
   renderArches();
+  updateSaveBarCounter();
   closeModal();
   showToast(`Diente ${currentTooth} reiniciado`);
 }
 
 function getToothName(fdi) {
   const pos = fdi % 10;
-  const isDecid = Math.floor(fdi/10) >= 5;
-  const names = isDecid ?
+  const decid = isDecid(fdi);
+  const names = decid ?
     {1:'Incisivo central',2:'Incisivo lateral',3:'Canino',4:'1er molar',5:'2do molar'} :
     {1:'Incisivo central',2:'Incisivo lateral',3:'Canino',4:'1er premolar',5:'2do premolar',6:'1er molar',7:'2do molar',8:'3er molar'};
   return names[pos] || '';
 }
 
+function updateSaveBarCounter() {
+  const n = Object.keys(state.teeth).length;
+  document.getElementById('cnt-teeth').textContent = n;
+  document.getElementById('saveBarInfo').innerHTML =
+    n === 0 ? `Listo · <strong>0</strong> dientes con datos` :
+    `Listo · <strong>${n}</strong> diente${n>1?'s':''} con datos`;
+}
+
 // ============================================================
-// EXPORT
+// PAYLOAD
 // ============================================================
 function buildPayload() {
+  const permanentes = [];
+  const deciduos = [];
+  Object.keys(state.teeth).forEach(fdi => {
+    const f = parseInt(fdi);
+    if (FDI_TO_PERMANENT_ID[f]) permanentes.push(FDI_TO_PERMANENT_ID[f]);
+    if (FDI_TO_DECIDUOUS_ID[f]) deciduos.push(FDI_TO_DECIDUOUS_ID[f]);
+  });
+
   return {
-    schema_version: '0.1',
+    schema_version: '0.6',
     notation: 'FDI',
     patient: {
       bitrix_company_id: state.patient.id || null,
-      display_name: state.patient.name || null,
+      volunteer_id: state.patient.volunteer_id || null,
       exam_date: state.patient.exam_date || null,
-      practitioner: state.patient.practitioner || null
+      form_type: state.patient.form_type || null,
+      modality: state.patient.modality || null
     },
     dentition_mode: state.dentition_mode,
     teeth: state.teeth,
+    teeth_lists: { permanentes, deciduos },
     cleft: state.cleft,
-    extraoral_findings: {
-      cabeza: state.findings.cabeza || '',
-      cara: state.findings.cara || '',
-      ojos: state.findings.ojos || '',
-      orejas: state.findings.orejas || '',
-      cuello: state.findings.cuello || '',
-      atm: state.findings.atm || '',
-      manos: state.findings.manos || '',
-      pies: state.findings.pies || ''
-    },
-    intraoral_findings: {
-      filtrum: state.findings.filtrum || '',
-      lengua: state.findings.lengua || '',
-      mucosa_carrillos: state.findings.mucosa_carrillos || '',
-      mucosa_labios: state.findings.mucosa_labios || ''
-    },
-    risk_factors: state.risk,
-    general_notes: state.findings.general_notes || '',
+    nose: state.nose,
+    surgery: state.surgery,
+    findings: state.findings,
+    risk: state.risk,
     generated_at: new Date().toISOString()
   };
 }
@@ -1414,23 +1889,20 @@ function copyJson() {
   navigator.clipboard.writeText(json).then(() => showToast('JSON copiado al portapapeles'));
 }
 
-async function simulateSend() {
-  // Validación previa
+async function saveToBitrix() {
   if (!state.patient.id || !state.patient.id.toString().trim()) {
-    showToast('Falta el ID del paciente');
+    showToast('Falta el ID del paciente', true);
     return;
   }
-  if (Object.keys(state.teeth).length === 0 &&
-      !Object.values(state.findings).some(v => v && v.trim())) {
-    if (!confirm('No hay datos del odontograma cargados. ¿Guardar de todas formas?')) return;
+  if (!state.patient.volunteer_id || !state.patient.volunteer_id.toString().trim()) {
+    showToast('Falta el ID del voluntario', true);
+    return;
   }
-
   const payload = buildPayload();
-  const btn = document.getElementById('btnSimulate');
+  const btn = document.getElementById('btnSave');
   const originalText = btn.textContent;
   btn.textContent = 'Guardando...';
   btn.disabled = true;
-
   const v = document.getElementById('jsonViewer');
 
   try {
@@ -1439,20 +1911,15 @@ async function simulateSend() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
     const data = await resp.json();
+    if (!resp.ok || data.error) throw new Error(data.error || `HTTP ${resp.status}`);
 
-    if (!resp.ok || data.error) {
-      throw new Error(data.error || `HTTP ${resp.status}`);
-    }
-
-    // Éxito
     v.textContent =
       '✓ GUARDADO EN BITRIX\n\n' +
       `Registro Dental ID: ${data.bitrix_dental_id}\n` +
       `Paciente ID: ${data.patient_id}\n` +
       `Campos escritos: ${data.fields_written}\n\n` +
-      '--- Payload enviado ---\n' +
+      '--- Payload ---\n' +
       JSON.stringify(payload, null, 2);
     v.classList.add('open');
     showToast(`✓ Guardado · Dental #${data.bitrix_dental_id}`);
@@ -1460,10 +1927,10 @@ async function simulateSend() {
     v.textContent =
       '✗ ERROR AL GUARDAR\n\n' +
       `Mensaje: ${err.message}\n\n` +
-      '--- Payload que se intentó enviar ---\n' +
+      '--- Payload ---\n' +
       JSON.stringify(payload, null, 2);
     v.classList.add('open');
-    showToast(`✗ Error: ${err.message}`);
+    showToast(`✗ ${err.message}`, true);
   } finally {
     btn.textContent = originalText;
     btn.disabled = false;
@@ -1472,34 +1939,38 @@ async function simulateSend() {
 
 function resetAll() {
   if (!confirm('¿Reiniciar todo el odontograma? Esta acción no se puede deshacer.')) return;
-  state.patient = { id: '', name: '', exam_date: '', practitioner: '' };
-  state.teeth = {};
-  state.cleft = { type: 'none', extent: null, structures: [], surgeries: { queilo: false, palato: false, injerto: false, rinoplastia: false, otra: false, notes: '' } };
-  state.findings = {};
-  state.risk = { bleeding: '', sugar: '', sugar_type: '' };
-  document.getElementById('patientId').value = '';
-  document.getElementById('patientName').value = '';
-  document.getElementById('practitioner').value = '';
-  document.querySelectorAll('input[name="cleft_type"]')[0].checked = true;
-  document.querySelectorAll('input[name="cleft_extent"]').forEach(r => r.checked = false);
-  document.querySelectorAll('.cleft-struct').forEach(c => c.checked = false);
-  document.querySelectorAll('.cleft-region').forEach(r => r.classList.remove('affected'));
-  ['queilo','palato','injerto','rinoplastia','otra'].forEach(s => document.getElementById('surg_' + s).checked = false);
-  document.getElementById('surg_notes').value = '';
-  document.querySelectorAll('[data-finding]').forEach(t => t.value = '');
-  document.getElementById('risk_bleeding').value = '';
-  document.getElementById('risk_sugar').value = '';
-  document.getElementById('risk_sugar_type').value = '';
-  renderArches();
+  // Reset state
+  Object.assign(state, {
+    patient: { id: '', volunteer_id: '', exam_date: document.getElementById('examDate').value, form_type: '', modality: '' },
+    dentition_mode: 'permanent',
+    teeth: {},
+    cleft: {},
+    surgery: { op_lip_yn:'', op_lip_items:[], op_pal_yn:'', op_pal_items:[], op_fis_yn:'', op_fis_items:[], op_inj_yn:'', op_inj_items:[] },
+    findings: {},
+    risk: {},
+    nose: { selected: [], other: '' }
+  });
+  // Reset DOM
+  document.querySelectorAll('input[type=text], input[type=date], textarea').forEach(el => {
+    if (el.id === 'examDate') return;
+    el.value = '';
+  });
+  document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+  document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.conditional').forEach(c => c.classList.remove('show'));
+  document.querySelectorAll('.surgery-list').forEach(l => l.innerHTML = '');
+  document.querySelector('#dentitionToggle .toggle-btn[data-mode="permanent"]').click();
   document.getElementById('jsonViewer').classList.remove('open');
+  updateSaveBarCounter();
   showToast('Odontograma reiniciado');
 }
 
-function showToast(msg) {
+function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
+  t.classList.toggle('error', !!isError);
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
+  setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
 </body>
